@@ -52,6 +52,62 @@
 | ViewModel の場所 | `ui/` | `feature/launcher/home/`・`feature/launcher/shortcutselect/` |
 | ViewModel 間の連携 | コールバック | Repository の StateFlow 経由（コールバックなし） |
 | 画面ルーティング | MainActivity の巨大 when | NavHost（薄い対応表） |
+| 各画面への ViewModel 受け渡し | MainViewModel を各画面に直接渡す | **feature 間依存禁止**（下記参照） |
+
+---
+
+## 各画面のシグネチャ設計方針
+
+### 原則: feature → feature の依存を持たない
+
+設計書より:
+> **`feature → feature` の矢印は存在しない**。
+
+各画面（Composable）は `homeViewModel` / `premiumViewModel` を**直接受け取らない**。  
+代わりに「必要なラムダ・値」だけを受け取る。Repository への書き込みは StateFlow 経由で自動反映される。
+
+### 各画面のシグネチャ（確定）
+
+```kotlin
+// HomeScreen — feature/launcher/home/ 内なので HomeViewModel 受け取りは OK
+fun HomeScreen(
+    homeViewModel: HomeViewModel,
+    premiumViewModel: PremiumViewModel,
+    snackbarHostState: SnackbarHostState
+)
+
+// ShortcutSelectScreen — homeViewModel 不要（書き込み → StateFlow 経由で反映）
+fun ShortcutSelectScreen(
+    viewModel: ShortcutSelectViewModel,
+    onBack: () -> Unit
+)
+
+// SettingsScreen — onEnterEditMode だけ MainActivity 経由で渡す
+fun SettingsScreen(
+    onBack: () -> Unit,
+    onEnterEditMode: () -> Unit,
+    onThemeChanged: (ThemeMode) -> Unit,
+    onWallpaperSettingChanged: (Boolean) -> Unit
+)
+
+// CalendarFullScreen・MemoScreen・AllAppsScreen — onBack のみ（+ 必要な値）
+fun CalendarFullScreen(hasPermission: Boolean, holidayMap: Map<Int, String>, onBack: () -> Unit)
+fun MemoScreen(onBack: () -> Unit)
+fun AllAppsScreen(onBack: () -> Unit, packageRemovedFlow: SharedFlow<String>?)
+```
+
+### BillingManager コールバックの扱い
+
+`MainActivity.onCreate` で `BillingManager` を生成する際、コールバックは空ラムダ `{}` を渡す。  
+購入完了の処理は Compose 側の `LaunchedEffect` が `PurchaseState` StateFlow を監視して行う。
+
+```kotlin
+billingManager = BillingManager(
+    context = this,
+    onPurchaseComplete = {},   // Compose 側が PurchaseState を監視して処理
+    onPurchaseCleared = {}     // onResume の refreshPremiumStatus() でカバー
+)
+```
 
 ---
 
