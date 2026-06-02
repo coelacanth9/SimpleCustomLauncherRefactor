@@ -8,9 +8,6 @@ import com.coelacanth9.simplecustomlauncher.core.shortcut.RowConfig
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutPlacement
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
@@ -26,32 +23,6 @@ class ShortcutRepository(private val context: Context) {
     private val placementLock = Any()
     private val layoutLock = Any()
 
-    // ===== リアクティブ状態 =====
-
-    private val _layoutState = MutableStateFlow(loadLayoutState())
-    val layoutState: StateFlow<LayoutState> = _layoutState.asStateFlow()
-
-    /**
-     * 全データを読み直して LayoutState を生成する。
-     * 呼び出し元は各ロックを解放した後に呼ぶこと（デッドロック防止）。
-     */
-    private fun loadLayoutState(): LayoutState = synchronized(shortcutLock) {
-        synchronized(placementLock) {
-            synchronized(layoutLock) {
-                LayoutState(
-                    config = getLayoutConfigInternal(),
-                    shortcuts = getAllShortcutsInternal(),
-                    placements = getAllPlacementsInternal()
-                )
-            }
-        }
-    }
-
-    /** 書き込み後に StateFlow を更新する */
-    private fun notifyChange() {
-        _layoutState.value = loadLayoutState()
-    }
-
     // ===== ショートカット =====
 
     fun saveShortcut(item: ShortcutItem) {
@@ -60,7 +31,6 @@ class ShortcutRepository(private val context: Context) {
             shortcuts[item.id] = item
             saveAllShortcuts(shortcuts.values.toList())
         }
-        notifyChange()
     }
 
     fun deleteShortcut(id: String) {
@@ -73,7 +43,6 @@ class ShortcutRepository(private val context: Context) {
             val placements = getAllPlacementsInternal().filter { it.shortcutId != id }
             saveAllPlacements(placements)
         }
-        notifyChange()
     }
 
     fun getShortcut(id: String): ShortcutItem? = getAllShortcuts()[id]
@@ -117,7 +86,6 @@ class ShortcutRepository(private val context: Context) {
             placements.add(placement)
             saveAllPlacements(placements)
         }
-        notifyChange()
     }
 
     fun getPlacementsForPage(pageIndex: Int): List<ShortcutPlacement> =
@@ -128,7 +96,6 @@ class ShortcutRepository(private val context: Context) {
             val placements = getAllPlacementsInternal().filter { it.shortcutId != shortcutId }
             saveAllPlacements(placements)
         }
-        notifyChange()
     }
 
     fun getAllPlacements(): List<ShortcutPlacement> {
@@ -144,7 +111,6 @@ class ShortcutRepository(private val context: Context) {
             }
             saveAllPlacements(placements)
         }
-        notifyChange()
     }
 
     private fun getAllPlacementsInternal(): List<ShortcutPlacement> {
@@ -165,7 +131,6 @@ class ShortcutRepository(private val context: Context) {
 
     fun saveLayoutConfig(config: HomeLayoutConfig) {
         synchronized(layoutLock) { saveLayoutConfigInternal(config) }
-        notifyChange()
     }
 
     private fun saveLayoutConfigInternal(config: HomeLayoutConfig) {
@@ -279,7 +244,6 @@ class ShortcutRepository(private val context: Context) {
     fun clearAllLayout() {
         prefs.edit().remove(KEY_SHORTCUTS).remove(KEY_PLACEMENTS).remove(KEY_LAYOUT).apply()
         saveLayoutConfig(HomeLayoutConfig(rows = emptyList()))
-        // saveLayoutConfig 内で notifyChange() 済み
     }
 
     fun clearPageLayout(pageIndex: Int) {
@@ -299,7 +263,6 @@ class ShortcutRepository(private val context: Context) {
                 }
             }
         }
-        notifyChange()
     }
 
     private fun createShortcutFromDef(def: ItemDef): ShortcutItem? {
