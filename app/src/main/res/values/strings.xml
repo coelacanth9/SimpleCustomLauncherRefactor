@@ -1,0 +1,284 @@
+<resources>
+    <string name="app_name">SimpleCustomLauncher</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <!-- Common -->
+    <string name="yes">はい</string>
+    <string name="no">いいえ</string>
+    <string name="cancel">キャンセル</string>
+    <string name="close">閉じる</string>
+    <string name="save">保存</string>
+    <string name="delete">削除</string>
+    <string name="delete_action">削除する</string>
+    <string name="add">追加</string>
+    <string name="add_action">追加する</string>
+    <string name="edit">編集</string>
+    <string name="search">検索</string>
+    <string name="back">戻る</string>
+    <string name="register">登録</string>
+    <string name="clear">クリア</string>
+    <string name="settings">設定</string>
+
+    <!-- Days of week -->
+    <string name="day_sun">日</string>
+    <string name="day_mon">月</string>
+    <string name="day_tue">火</string>
+    <string name="day_wed">水</string>
+    <string name="day_thu">木</string>
+    <string name="day_fri">金</string>
+    <string name="day_sat">土</string>
+
+    <!-- Home Screen -->
+    <string name="add_row">＋行追加</string>
+    <string name="edit_mode">編集モード</string>
+    <string name="edit_complete">編集完了</string>
+    <string name="tap_to_edit">タップで編集</string>
+    <string name="tap_to_place">タップで配置</string>
+    <string name="tap_to_swap">タップで入れ替え</string>
+    <string name="empty_slot">空き</string>
+    <string name="no_empty_slot">空きスロットがありません</string>
+    <string name="launch_failed">起動できませんでした</string>
+    <string name="launch_failed_with_error">起動できませんでした: %s</string>
+    <string name="shortcut_info_not_found">ショートカット情報が見つかりません</string>
+    <string name="confirm_open_app">%sを開きますか？</string>
+
+    <!-- Shortcut Types -->
+    <string name="shortcut_type_calendar">カレンダー</string>
+    <string name="shortcut_type_memo">メモ帳</string>
+    <string name="shortcut_type_phone">電話</string>
+    <string name="shortcut_type_all_apps">アプリ一覧</string>
+    <string name="shortcut_type_call">通話</string>
+    <string name="shortcut_type_sms">SMS</string>
+    <string name="shortcut_type_date">日付</string>
+    <string name="shortcut_type_time">時刻</string>
+    <string name="shortcut_type_device_settings">端末設定</string>
+    <string name="select_device_settings">ショートカットにしたい設定を選択</string>
+    <string name="device_settings_main">設定（メイン）</string>
+    <string name="device_settings_wifi">Wi-Fi</string>
+    <string name="device_settings_bluetooth">Bluetooth</string>
+    <string name="device_settings_tethering">テザリング</string>
+    <string name="device_settings_display">ディスプレイ</string>
+    <string name="device_settings_sound">音・バイブ</string>
+    <string name="device_settings_location">位置情報</string>
+    <string name="device_settings_apps">アプリ一覧（設定）</string>
+    <string name="device_settings_battery">バッテリー</string>
+    <string name="device_settings_airplane">機内モード</string>
+
+    <!-- Shortcut Add/Edit Screen -->
+    <string name="add_shortcut">ショートカットを追加</string>
+    <string name="select_app">アプリを選択</string>
+    <string name="app_list">アプリ一覧</string>
+    <string name="select_from_app_list">アプリ一覧から選ぶ</string>
+    <string name="internal_features">アプリ内機能</string>
+    <string name="search_app_name">アプリ名で検索</string>
+    <string name="app_count">%d件のアプリ</string>
+    <string name="launch_app">アプリを起動</string>
+    <string name="no_shortcuts_for_app">このアプリにはショートカットがありません</string>
+    <string name="shortcut">ショートカット</string>
+    <string name="shortcut_count">ショートカット (%d件)</string>
+    <string name="unplaced_shortcuts">一時保管</string>
+    <string name="delete_unplaced_shortcut">ショートカットを削除</string>
+    <string name="delete_unplaced_confirm">このショートカットを完全に削除しますか？</string>
+    <string name="swap_with_placed">配置済みと入れ替え</string>
+    <string name="place_in_slot">このスロットに配置</string>
+    <string name="clear_slot">このスロットを空にする</string>
+    <string name="clear_slot_warning">このスロットの内容は削除されます。よろしいですか？</string>
+    <string name="item_added_to_storage">「%s」を一時保管に追加しました</string>
+    <string name="item_added">「%s」を追加しました</string>
+    <string name="name_added">「%s」を追加しました</string>
+
+    <!-- Row Settings -->
+    <string name="add_row_title">行を追加</string>
+    <string name="select_column_count">分割数を選んでください</string>
+    <string name="change_column_count">分割数を変更</string>
+    <string name="current_column_count">この行の分割数を変更（現在: %d分割）</string>
+    <string name="select_row_column_count">この行の分割数を選んでください</string>
+    <string name="column_count_format">%d分割</string>
+    <string name="column_1_desc">横長ボタン1つ（文字大きめ）</string>
+    <string name="column_2_desc">ボタン2つ横並び</string>
+    <string name="column_3_desc">ボタン3つ横並び（アイコンのみ）</string>
+    <string name="delete_row">この行全体を削除する</string>
+    <string name="delete_row_warning">この行のショートカットがすべて削除されます。よろしいですか？</string>
+    <string name="cannot_add_more_rows">これ以上行を追加できません</string>
+    <string name="column_reduce_warning">※分割数を減らすと、はみ出たショートカットは未配置になります</string>
+    <string name="display_mode">表示モード</string>
+    <string name="display_mode_icon_text">アイコンとラベルを表示</string>
+    <string name="display_mode_text_only">ラベルのみ表示</string>
+    <string name="background_color">背景色と文字色</string>
+    <string name="background_color_default">デフォルト</string>
+    <string name="background_color_premium">色の変更はプレミアム機能です</string>
+
+    <!-- Page Settings -->
+    <string name="page_count_format">%dページ</string>
+    <string name="delete_page">このページを削除</string>
+    <string name="delete_page_warning">このページのショートカットがすべて削除されます。よろしいですか？</string>
+    <string name="add_page">ページを追加</string>
+    <string name="select_page_count">ページ数を選択</string>
+    <string name="page_limit_reached">このページは行数の上限に\n達しています。\n新しいページを追加しますか？</string>
+    <string name="home_page_count">ホーム画面のページ数</string>
+    <string name="page_loop">ページのループ</string>
+    <string name="page_loop_desc">最後のページから最初のページへ移動可能</string>
+    <string name="multi_page_swipe">スワイプで複数ページを切り替え</string>
+
+    <!-- Premium -->
+    <string name="premium_feature">プレミアム機能</string>
+    <string name="premium_page_locked">このページはプレミアム機能です</string>
+    <string name="premium_multi_page">プレミアム機能：複数ページに対応</string>
+    <string name="premium_page_only">複数ページ機能はプレミアム限定です。</string>
+    <string name="premium_unlock_prompt">動画を見るか課金して\nすべてのページを解除できます</string>
+    <string name="premium_unlock_short">動画を見るか課金して解除できます。</string>
+    <string name="premium_add_page_prompt">ページの追加はプレミアム機能です。\n動画視聴または課金で\nご利用いただけます。</string>
+    <string name="watch_ad_unlock">動画を見て24時間解除</string>
+    <string name="ad_loading">広告を読み込み中…</string>
+    <string name="purchase_unlock">課金して永久解除</string>
+    <string name="purchase_with_price">%sで永久解除</string>
+    <string name="premium_price_format">%sで永久に解除できます。</string>
+    <string name="lock">ロック</string>
+    <string name="billing_unavailable">課金サービスに接続できません</string>
+    <string name="purchase_complete">購入が完了しました</string>
+    <string name="purchase_restored">購入を復元しました</string>
+    <string name="purchase_failed">購入に失敗しました</string>
+
+    <!-- Contact -->
+    <string name="contact">連絡先</string>
+    <string name="add_from_contact">連絡先から追加</string>
+    <string name="select_contact_type">どちらのショートカットを作成しますか？</string>
+    <string name="tap_to_call">宛先入力済みで発信画面を表示</string>
+    <string name="tap_to_message">宛先とのメッセージ画面を表示</string>
+    <string name="link_call">楽天Linkで通話</string>
+    <string name="link_sms">楽天LinkでSMS</string>
+    <string name="link_sms_list">LinkSMS一覧</string>
+    <string name="link_call_list">Link通話一覧</string>
+    <string name="link_dialpad">電話（Link）</string>
+    <string name="link_removed_by_column_change">この行の楽天Link関連のショートカットは削除されます。よろしいですか？</string>
+    <string name="tap_to_call_link">宛先入力済みで発信画面を表示</string>
+    <string name="tap_to_message_link">宛先とのメッセージ画面を表示</string>
+    <string name="tap_to_message_link_contact">楽天LinkでSMSを開く</string>
+    <string name="link_sms_no_history">この連絡先との楽天LinkのSMS履歴がありません。先に楽天LinkでSMSを送受信してください（相手からの返信が必要な場合があります）</string>
+    <string name="set_as_home_to_use_shortcut">ホームアプリに設定してください</string>
+    <string name="shortcut_may_be_invalid">このショートカットは無効になった可能性があります。楽天Linkで相手からの返信があるSMS履歴が存在する場合は、連絡先からショートカットを作り直してください</string>
+
+    <!-- App Settings -->
+    <string name="app_settings">アプリ設定</string>
+    <string name="phone_settings">スマホ設定</string>
+    <string name="home_app_settings">ホームアプリの設定</string>
+    <string name="set_as_default_home">このアプリを標準のホームアプリに設定</string>
+    <string name="layout_edit">レイアウト編集</string>
+    <string name="edit_layout_desc">アプリの配置を変更します</string>
+    <string name="reset_to_default">初期状態にリセット</string>
+    <string name="reset_to_default_short">初期状態に戻す</string>
+    <string name="clear_layout">全ページのレイアウトをクリア</string>
+    <string name="clear_layout_warning">すべてのページの行とアプリ配置が削除されます。この操作は取り消せません。よろしいですか？</string>
+    <string name="clear_layout_desc">すべてのページの行と配置が削除されます</string>
+    <string name="clear_confirm_message">すべてのページの行とアプリ配置が削除されます。この操作は取り消せません。よろしいですか？</string>
+    <string name="reset_page">レイアウトをクリア</string>
+    <string name="reset_page_warning">このページの行とアプリ配置が削除されます。よろしいですか？</string>
+    <string name="reset_layout_warning">現在の配置がすべて消去され、デフォルトの配置に戻ります。この操作は取り消せません。よろしいですか？</string>
+    <string name="reset_layout_desc">アプリの配置がデフォルトに戻ります</string>
+    <string name="reset_confirm_message">現在の配置がすべて消去され、デフォルトの配置に戻ります。この操作は取り消せません。よろしいですか？</string>
+    <string name="confirm_change_layout">ショートカットの配置を\n変更しますか？</string>
+    <string name="theme">テーマ</string>
+    <string name="select_theme">テーマを選択</string>
+    <string name="change_theme_desc">画面の配色を変更</string>
+    <string name="theme_light">ライト</string>
+    <string name="theme_dark">ダーク</string>
+    <string name="theme_system">端末設定に合わせる</string>
+    <string name="show_system_wallpaper">壁紙を表示</string>
+    <string name="show_system_wallpaper_desc">端末の壁紙をホーム画面の背景に表示</string>
+    <string name="tap_mode">起動操作</string>
+    <string name="tap_mode_desc">アプリを起動するときの操作</string>
+    <string name="tap_mode_single">タップ</string>
+    <string name="tap_mode_long">長押し</string>
+    <string name="select_tap_mode">タップ操作を選択</string>
+    <string name="confirm_before_launch">起動時に確認</string>
+    <string name="confirm_before_launch_desc">アプリを起動する前に確認ダイアログを表示</string>
+    <string name="haptic_feedback">タップ時の振動</string>
+    <string name="haptic_feedback_desc">タップ時に振動でフィードバック</string>
+    <string name="vibration_strength">振動の強さ</string>
+    <string name="vibration_strength_desc">タップ時の振動フィードバックの強さ</string>
+    <string name="vibration_off">OFF</string>
+    <string name="vibration_weak">弱</string>
+    <string name="vibration_medium">中</string>
+    <string name="vibration_strong">強</string>
+    <string name="select_vibration_strength">振動の強さを選択</string>
+    <string name="font_size_settings">文字サイズ設定</string>
+    <string name="font_size_small">小 (16)</string>
+    <string name="font_size_standard">標準 (20)</string>
+    <string name="font_size_large">大 (24)</string>
+    <string name="font_size_xlarge">特大 (28)</string>
+    <string name="font_size_max">最大 (32)</string>
+    <string name="version">バージョン</string>
+    <string name="how_to_use">使い方</string>
+    <string name="how_to_use_desc">アプリの使い方を確認</string>
+    <string name="welcome_title">はじめに</string>
+    <string name="welcome_message">使い方ページで基本的な操作方法をご確認いただけます。\n\nアプリ設定からいつでも確認できます。</string>
+    <string name="open_how_to_use">使い方を見る</string>
+    <string name="privacy_policy">プライバシーポリシー</string>
+    <string name="privacy_policy_desc">個人情報の取り扱いについて</string>
+    <string name="terms_of_service">利用規約</string>
+    <string name="terms_of_service_desc">アプリの利用条件について</string>
+    <string name="oss_licenses">オープンソースライセンス</string>
+    <string name="oss_licenses_desc">使用しているライブラリのライセンス情報</string>
+    <string name="terms_consent_message">本アプリの利用規約をご確認ください。\n\n利用規約には、広告の表示、課金機能、免責事項などについて記載されています。</string>
+    <string name="terms_required_for_purchase">有料機能をご利用いただくには、利用規約（返金に関する規定を含みます）への同意が必要です。</string>
+    <string name="terms_agree">同意する</string>
+    <string name="terms_later">あとで</string>
+    <string name="terms_decline">同意しない</string>
+    <string name="terms_view">利用規約を読む</string>
+
+    <!-- Backup/Restore -->
+    <string name="backup_restore">バックアップ / 復元</string>
+    <string name="export_backup">設定をエクスポート</string>
+    <string name="export_backup_desc">レイアウトと設定をファイルに保存</string>
+    <string name="import_backup">設定をインポート</string>
+    <string name="import_backup_desc">ファイルからレイアウトと設定を復元</string>
+    <string name="backup_share_title">バックアップファイルを共有</string>
+    <string name="restore_success">復元しました（ショートカット: %1$d件、ページ: %2$d）</string>
+    <string name="restore_error">復元に失敗しました</string>
+    <string name="restore_confirm_title">バックアップを復元</string>
+    <string name="restore_confirm_message">現在のレイアウトと設定がすべて上書きされます。続けますか？</string>
+    <string name="restore">復元</string>
+
+    <!-- Calendar -->
+    <string name="calendar">カレンダー</string>
+    <string name="prev_month">前の月</string>
+    <string name="next_month">次の月</string>
+    <string name="year_month_format">%d年%d月</string>
+    <string name="date_format">yyyy年M月d日(E)</string>
+    <string name="holiday">祝日</string>
+    <string name="substitute_holiday">振替休日</string>
+    <string name="substitute">振替</string>
+    <string name="holiday_suffix">の日</string>
+    <string name="country_japan">日本</string>
+
+    <!-- Memo -->
+    <string name="memo">メモ帳</string>
+    <string name="edit_memo">メモを編集</string>
+    <string name="new_memo_hint">新しいメモを入力</string>
+    <string name="no_memo">メモがありません\n上の入力欄から追加してください</string>
+    <string name="memo_limit_reached">メモは%d件までです</string>
+    <string name="memo_char_count">%1$d / %2$d</string>
+    <string name="check_all">全件選択</string>
+    <string name="delete_checked">選択を削除</string>
+    <string name="delete_checked_confirm">チェック済みのメモをすべて削除しますか？</string>
+
+    <!-- Default Apps -->
+    <string name="app_camera">カメラ</string>
+    <string name="app_photos">フォト</string>
+    <string name="app_maps">マップ</string>
+    <string name="app_messages">メッセージ</string>
+    <string name="app_menu">メニュー</string>
+    <string name="app_google">Google</string>
+    <string name="app_line">LINE</string>
+    <string name="app_chrome">Chrome</string>
+    <string name="app_youtube">YouTube</string>
+    <string name="app_gmail">Gmail</string>
+
+    <!-- Error Messages -->
+    <string name="error_query">クエリエラー</string>
+    <string name="cannot_open_all_apps_in_edit_mode">編集モード中はアプリ一覧を開けません</string>
+
+    <!-- App Context Menu -->
+    <string name="app_info">アプリ情報</string>
+    <string name="uninstall">アンインストール</string>
+</resources>
