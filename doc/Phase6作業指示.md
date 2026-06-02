@@ -35,6 +35,8 @@
 | `HomeScreen.kt` | `feature/launcher/home/` | ホーム画面グリッド・編集モード |
 | `ShortcutSelectScreen.kt` | `feature/launcher/shortcutselect/` | ショートカット選択・配置 |
 | `SettingsScreen.kt` | `feature/screens/settings/` | アプリ設定（旧 AppSettingsScreen） |
+| `SettingsViewModel.kt` | `feature/screens/settings/` | プレミアム・広告・購入フローを管理 |
+| `SettingsViewModelFactory.kt` | `feature/screens/settings/` | — |
 | `CalendarFullScreen.kt` | `feature/screens/calendar/` | カレンダー |
 | `MemoScreen.kt` | `feature/screens/memo/` | メモ帳 |
 | `AllAppsScreen.kt` | `feature/screens/allapps/` | 全アプリ一覧 |
@@ -82,12 +84,13 @@ fun ShortcutSelectScreen(
     onBack: () -> Unit
 )
 
-// SettingsScreen — onEnterEditMode だけ MainActivity 経由で渡す
+// SettingsScreen — プレミアム関連は内部の SettingsViewModel が持つ
 fun SettingsScreen(
     onBack: () -> Unit,
     onEnterEditMode: () -> Unit,
     onThemeChanged: (ThemeMode) -> Unit,
     onWallpaperSettingChanged: (Boolean) -> Unit
+    // isPremium / onWatchAd / onPurchase 等は SettingsViewModel が管理
 )
 
 // CalendarFullScreen・MemoScreen・AllAppsScreen — onBack のみ（+ 必要な値）
