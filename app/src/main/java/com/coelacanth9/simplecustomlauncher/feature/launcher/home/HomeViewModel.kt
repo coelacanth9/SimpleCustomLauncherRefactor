@@ -186,6 +186,7 @@ class HomeViewModel(
 
     /** MainActivity から課金完了時に呼ぶ */
     fun onPurchaseCompleted() {
+        premiumManager.recordPurchase()
         isPremium = premiumManager.isPremiumActive()
         if (pendingAddPageAfterPurchase) {
             pendingAddPageAfterPurchase = false
