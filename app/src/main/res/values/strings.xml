@@ -243,7 +243,7 @@
     <string name="calendar">カレンダー</string>
     <string name="prev_month">前の月</string>
     <string name="next_month">次の月</string>
-    <string name="year_month_format">%d年%d月</string>
+    <string name="year_month_format">%1$d年%2$d月</string>
     <string name="date_format">yyyy年M月d日(E)</string>
     <string name="holiday">祝日</string>
     <string name="substitute_holiday">振替休日</string>
