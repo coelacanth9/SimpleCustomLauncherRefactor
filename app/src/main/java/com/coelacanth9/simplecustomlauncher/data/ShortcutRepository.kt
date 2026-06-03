@@ -3,12 +3,12 @@ package com.coelacanth9.simplecustomlauncher.data
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import com.coelacanth9.simplecustomlauncher.core.shortcut.HomeLayoutConfig
-import com.coelacanth9.simplecustomlauncher.core.shortcut.RowConfig
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutPlacement
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
+import com.coelacanth9.simplecustomlauncher.core.layout.HomeLayoutConfig
 import com.coelacanth9.simplecustomlauncher.core.layout.LayoutState
+import com.coelacanth9.simplecustomlauncher.core.layout.RowConfig
+import com.coelacanth9.simplecustomlauncher.core.layout.ShortcutPlacement
+import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
+import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

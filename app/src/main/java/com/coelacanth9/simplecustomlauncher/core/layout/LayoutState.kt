@@ -1,8 +1,6 @@
 package com.coelacanth9.simplecustomlauncher.core.layout
 
-import com.coelacanth9.simplecustomlauncher.core.shortcut.HomeLayoutConfig
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutPlacement
 
 /**
  * レイアウト全体の状態スナップショット。

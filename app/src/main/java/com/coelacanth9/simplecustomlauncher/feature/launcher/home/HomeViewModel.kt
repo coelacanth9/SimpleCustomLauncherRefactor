@@ -13,10 +13,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.coelacanth9.simplecustomlauncher.R
+import com.coelacanth9.simplecustomlauncher.core.layout.HomeLayoutConfig
 import com.coelacanth9.simplecustomlauncher.core.layout.LayoutState
+import com.coelacanth9.simplecustomlauncher.core.layout.RowConfig
 import com.coelacanth9.simplecustomlauncher.core.navigation.NavDestination
-import com.coelacanth9.simplecustomlauncher.core.shortcut.HomeLayoutConfig
-import com.coelacanth9.simplecustomlauncher.core.shortcut.RowConfig
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
 import com.coelacanth9.simplecustomlauncher.core.shortcut.isLinkCallList

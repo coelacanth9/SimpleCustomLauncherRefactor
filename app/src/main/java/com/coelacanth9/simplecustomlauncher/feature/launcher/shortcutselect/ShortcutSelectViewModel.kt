@@ -5,10 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.coelacanth9.simplecustomlauncher.core.layout.HomeLayoutConfig
 import com.coelacanth9.simplecustomlauncher.core.layout.LayoutState
-import com.coelacanth9.simplecustomlauncher.core.shortcut.HomeLayoutConfig
+import com.coelacanth9.simplecustomlauncher.core.layout.ShortcutPlacement
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutPlacement
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
 import com.coelacanth9.simplecustomlauncher.core.shortcut.isLinkRelated
 import com.coelacanth9.simplecustomlauncher.core.shortcut.shouldDeleteOnRemove

@@ -83,11 +83,11 @@ import androidx.core.graphics.drawable.toBitmap
 import com.coelacanth9.simplecustomlauncher.R
 import com.coelacanth9.simplecustomlauncher.core.navigation.NavDestination
 import com.coelacanth9.simplecustomlauncher.core.shortcut.RAKUTEN_LINK_PACKAGE
-import com.coelacanth9.simplecustomlauncher.core.shortcut.RowConfig
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutPlacement
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
 import com.coelacanth9.simplecustomlauncher.core.layout.LayoutState
+import com.coelacanth9.simplecustomlauncher.core.layout.RowConfig
+import com.coelacanth9.simplecustomlauncher.core.layout.ShortcutPlacement
+import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
+import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.TapMode
 import com.coelacanth9.simplecustomlauncher.data.VibrationStrength
