@@ -53,7 +53,7 @@ import com.coelacanth9.simplecustomlauncher.feature.screens.calendar.CalendarScr
 import com.coelacanth9.simplecustomlauncher.feature.screens.memo.MemoScreen
 import com.coelacanth9.simplecustomlauncher.feature.screens.settings.SettingsScreen
 import com.coelacanth9.simplecustomlauncher.feature.screens.settings.SettingsViewModel
-import com.coelacanth9.simplecustomlauncher.platform.CalendarRepository
+import com.coelacanth9.simplecustomlauncher.data.CalendarRepository
 import com.coelacanth9.simplecustomlauncher.platform.PermissionManager
 import com.coelacanth9.simplecustomlauncher.platform.PermissionManager.CALENDAR_PERMISSIONS
 import com.coelacanth9.simplecustomlauncher.platform.RequestPermissions

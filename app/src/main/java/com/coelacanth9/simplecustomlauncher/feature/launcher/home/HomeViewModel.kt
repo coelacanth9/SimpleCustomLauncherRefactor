@@ -25,7 +25,7 @@ import com.coelacanth9.simplecustomlauncher.model.isLinkRelated
 import com.coelacanth9.simplecustomlauncher.model.shouldDeleteOnRemove
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
-import com.coelacanth9.simplecustomlauncher.platform.CalendarRepository
+import com.coelacanth9.simplecustomlauncher.data.CalendarRepository
 import com.coelacanth9.simplecustomlauncher.platform.ShortcutHelper
 import com.coelacanth9.simplecustomlauncher.platform.ads.AdManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.BillingManager

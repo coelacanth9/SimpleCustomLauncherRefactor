@@ -91,7 +91,7 @@ import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.TapMode
 import com.coelacanth9.simplecustomlauncher.data.VibrationStrength
-import com.coelacanth9.simplecustomlauncher.platform.CalendarRepository
+import com.coelacanth9.simplecustomlauncher.data.CalendarRepository
 import com.coelacanth9.simplecustomlauncher.platform.ShortcutHelper
 import com.coelacanth9.simplecustomlauncher.ui.components.AddPageConfirmDialog
 import com.coelacanth9.simplecustomlauncher.ui.components.AddRowDialog

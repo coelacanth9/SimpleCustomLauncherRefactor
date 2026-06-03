@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.coelacanth9.simplecustomlauncher.R
-import com.coelacanth9.simplecustomlauncher.platform.CalendarRepository
+import com.coelacanth9.simplecustomlauncher.data.CalendarRepository
 import java.time.LocalDate
 import java.time.YearMonth
 

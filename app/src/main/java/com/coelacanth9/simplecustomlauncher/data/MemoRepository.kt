@@ -2,6 +2,7 @@ package com.coelacanth9.simplecustomlauncher.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.coelacanth9.simplecustomlauncher.model.MemoItem
 import org.json.JSONArray
 import org.json.JSONObject
 

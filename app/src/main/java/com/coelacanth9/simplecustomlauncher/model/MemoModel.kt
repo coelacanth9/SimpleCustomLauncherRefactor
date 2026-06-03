@@ -1,4 +1,4 @@
-package com.coelacanth9.simplecustomlauncher.data
+package com.coelacanth9.simplecustomlauncher.model
 
 import java.util.UUID
 

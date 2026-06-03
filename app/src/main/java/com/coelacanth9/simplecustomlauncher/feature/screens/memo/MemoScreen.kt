@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.coelacanth9.simplecustomlauncher.R
-import com.coelacanth9.simplecustomlauncher.data.MemoItem
+import com.coelacanth9.simplecustomlauncher.model.MemoItem
 import com.coelacanth9.simplecustomlauncher.data.MemoRepository
 import com.coelacanth9.simplecustomlauncher.ui.components.DangerConfirmDialog
 

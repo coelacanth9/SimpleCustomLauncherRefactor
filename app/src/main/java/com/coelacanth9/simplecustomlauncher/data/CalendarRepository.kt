@@ -1,4 +1,4 @@
-package com.coelacanth9.simplecustomlauncher.platform
+package com.coelacanth9.simplecustomlauncher.data
 
 import android.content.ContentUris
 import android.content.Context
