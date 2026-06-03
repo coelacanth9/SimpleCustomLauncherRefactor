@@ -39,7 +39,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.coelacanth9.simplecustomlauncher.navigation.NavDestination
 import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.model.ShortcutType
-import com.coelacanth9.simplecustomlauncher.data.BackupManager
+import com.coelacanth9.simplecustomlauncher.platform.BackupManager
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.data.ThemeMode
@@ -254,7 +254,7 @@ fun MainLauncherScreen(
                     settingsRepository = settingsRepo,
                     premiumManager = DefaultPremiumManager(context, settingsRepo),
                     shortcutRepository = shortcutRepository,
-                    backupManager = BackupManager(context),
+                    backupManager = BackupManager(context, shortcutRepository, settingsRepo),
                     billingManager = billingManager,
                     adManager = adManager
                 )

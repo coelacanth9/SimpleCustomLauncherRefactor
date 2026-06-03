@@ -4,8 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import com.coelacanth9.simplecustomlauncher.data.BackupManager
-import com.coelacanth9.simplecustomlauncher.data.RestoreResult
+import com.coelacanth9.simplecustomlauncher.platform.BackupManager
+import com.coelacanth9.simplecustomlauncher.platform.RestoreResult
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.platform.ads.AdManager

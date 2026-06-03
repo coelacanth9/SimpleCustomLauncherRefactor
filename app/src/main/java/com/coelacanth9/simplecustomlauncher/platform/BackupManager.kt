@@ -1,13 +1,18 @@
-package com.coelacanth9.simplecustomlauncher.data
+package com.coelacanth9.simplecustomlauncher.platform
 
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
+import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
+import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
+import com.coelacanth9.simplecustomlauncher.data.ThemeMode
+import com.coelacanth9.simplecustomlauncher.data.TapMode
+import com.coelacanth9.simplecustomlauncher.data.VibrationStrength
 import com.coelacanth9.simplecustomlauncher.model.HomeLayoutConfig
 import com.coelacanth9.simplecustomlauncher.model.RowConfig
-import com.coelacanth9.simplecustomlauncher.model.ShortcutPlacement
 import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
+import com.coelacanth9.simplecustomlauncher.model.ShortcutPlacement
 import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 import org.json.JSONArray
 import org.json.JSONObject
@@ -16,10 +21,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class BackupManager(private val context: Context) {
-
-    private val shortcutRepository = ShortcutRepository(context)
-    private val settingsRepository = SettingsRepository(context)
+class BackupManager(
+    private val context: Context,
+    private val shortcutRepository: ShortcutRepository,
+    private val settingsRepository: SettingsRepository
+) {
 
     companion object {
         private const val BACKUP_VERSION = 1
