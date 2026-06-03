@@ -1,4 +1,4 @@
-package com.coelacanth9.simplecustomlauncher.core.shortcut
+package com.coelacanth9.simplecustomlauncher.model
 
 /**
  * ショートカットの種類
@@ -32,4 +32,3 @@ data class ShortcutItem(
     val phoneNumber: String? = null,
     val iconUri: String? = null
 )
-

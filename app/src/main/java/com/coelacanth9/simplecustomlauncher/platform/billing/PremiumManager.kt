@@ -3,18 +3,8 @@ package com.coelacanth9.simplecustomlauncher.platform.billing
 import android.content.Context
 import android.content.SharedPreferences
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
-
-enum class PremiumSource {
-    AD_WATCH,
-    ONE_TIME_PURCHASE,
-    SUBSCRIPTION
-}
-
-data class PremiumStatus(
-    val isActive: Boolean,
-    val activeSources: Set<PremiumSource>,
-    val adWatchExpiresAt: Long? = null
-)
+import com.coelacanth9.simplecustomlauncher.model.PremiumSource
+import com.coelacanth9.simplecustomlauncher.model.PremiumStatus
 
 interface PremiumManager {
     fun isPremiumActive(): Boolean

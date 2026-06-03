@@ -13,16 +13,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.coelacanth9.simplecustomlauncher.R
-import com.coelacanth9.simplecustomlauncher.core.layout.HomeLayoutConfig
-import com.coelacanth9.simplecustomlauncher.core.layout.LayoutState
-import com.coelacanth9.simplecustomlauncher.core.layout.RowConfig
-import com.coelacanth9.simplecustomlauncher.core.navigation.NavDestination
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
-import com.coelacanth9.simplecustomlauncher.core.shortcut.isLinkCallList
-import com.coelacanth9.simplecustomlauncher.core.shortcut.isLinkDialer
-import com.coelacanth9.simplecustomlauncher.core.shortcut.isLinkRelated
-import com.coelacanth9.simplecustomlauncher.core.shortcut.shouldDeleteOnRemove
+import com.coelacanth9.simplecustomlauncher.model.HomeLayoutConfig
+import com.coelacanth9.simplecustomlauncher.model.LayoutState
+import com.coelacanth9.simplecustomlauncher.model.RowConfig
+import com.coelacanth9.simplecustomlauncher.navigation.NavDestination
+import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
+import com.coelacanth9.simplecustomlauncher.model.ShortcutType
+import com.coelacanth9.simplecustomlauncher.model.isLinkCallList
+import com.coelacanth9.simplecustomlauncher.model.isLinkDialer
+import com.coelacanth9.simplecustomlauncher.model.isLinkRelated
+import com.coelacanth9.simplecustomlauncher.model.shouldDeleteOnRemove
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.platform.CalendarRepository
@@ -31,7 +31,7 @@ import com.coelacanth9.simplecustomlauncher.platform.ads.AdManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.BillingManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.PremiumManager
 import com.coelacanth9.simplecustomlauncher.platform.toIntent
-import com.coelacanth9.simplecustomlauncher.core.shortcut.RAKUTEN_LINK_PACKAGE
+import com.coelacanth9.simplecustomlauncher.model.RAKUTEN_LINK_PACKAGE
 import kotlinx.coroutines.flow.StateFlow
 
 // ===== エラー型 =====

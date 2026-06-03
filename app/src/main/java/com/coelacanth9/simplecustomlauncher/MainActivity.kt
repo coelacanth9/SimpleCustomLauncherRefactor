@@ -36,9 +36,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.coelacanth9.simplecustomlauncher.core.navigation.NavDestination
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
+import com.coelacanth9.simplecustomlauncher.navigation.NavDestination
+import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
+import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 import com.coelacanth9.simplecustomlauncher.data.BackupManager
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository

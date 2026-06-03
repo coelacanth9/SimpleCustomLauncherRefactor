@@ -1,4 +1,4 @@
-package com.coelacanth9.simplecustomlauncher.core.shortcut
+package com.coelacanth9.simplecustomlauncher.model
 
 /** 楽天Link アプリのパッケージ名 */
 const val RAKUTEN_LINK_PACKAGE = "jp.co.rakuten.mobile.rcs"

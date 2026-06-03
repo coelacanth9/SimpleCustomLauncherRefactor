@@ -1,4 +1,4 @@
-package com.coelacanth9.simplecustomlauncher.core.layout
+package com.coelacanth9.simplecustomlauncher.model
 
 /**
  * ショートカットの配置情報（どのスロットに何があるか）

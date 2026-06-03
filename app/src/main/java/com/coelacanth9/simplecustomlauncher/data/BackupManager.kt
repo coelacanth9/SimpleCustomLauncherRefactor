@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
-import com.coelacanth9.simplecustomlauncher.core.layout.HomeLayoutConfig
-import com.coelacanth9.simplecustomlauncher.core.layout.RowConfig
-import com.coelacanth9.simplecustomlauncher.core.layout.ShortcutPlacement
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
+import com.coelacanth9.simplecustomlauncher.model.HomeLayoutConfig
+import com.coelacanth9.simplecustomlauncher.model.RowConfig
+import com.coelacanth9.simplecustomlauncher.model.ShortcutPlacement
+import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
+import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File

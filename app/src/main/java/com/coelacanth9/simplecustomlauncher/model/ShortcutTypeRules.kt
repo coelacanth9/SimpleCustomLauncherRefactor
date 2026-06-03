@@ -1,4 +1,4 @@
-package com.coelacanth9.simplecustomlauncher.core.shortcut
+package com.coelacanth9.simplecustomlauncher.model
 
 /**
  * アプリ内機能タイプかどうか。

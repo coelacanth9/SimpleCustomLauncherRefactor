@@ -9,7 +9,7 @@ import android.graphics.drawable.Drawable
 import android.os.Process
 import android.telephony.PhoneNumberUtils
 import android.util.Log
-import com.coelacanth9.simplecustomlauncher.core.shortcut.RAKUTEN_LINK_PACKAGE
+import com.coelacanth9.simplecustomlauncher.model.RAKUTEN_LINK_PACKAGE
 
 /** 楽天LinkがインストールされているかどうかをPackageManagerで判定 */
 fun PackageManager.isRakutenLinkInstalled(): Boolean = try {

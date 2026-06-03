@@ -1,7 +1,7 @@
 package com.coelacanth9.simplecustomlauncher.ui.components
 
 import com.coelacanth9.simplecustomlauncher.R
-import com.coelacanth9.simplecustomlauncher.core.shortcut.RAKUTEN_LINK_PACKAGE
+import com.coelacanth9.simplecustomlauncher.model.RAKUTEN_LINK_PACKAGE
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

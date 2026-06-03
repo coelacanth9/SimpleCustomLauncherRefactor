@@ -1,4 +1,4 @@
-package com.coelacanth9.simplecustomlauncher.core.navigation
+package com.coelacanth9.simplecustomlauncher.navigation
 
 /**
  * 画面遷移の目的地。

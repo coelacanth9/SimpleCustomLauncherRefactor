@@ -42,10 +42,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import com.coelacanth9.simplecustomlauncher.core.shortcut.RAKUTEN_LINK_PACKAGE
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
-import com.coelacanth9.simplecustomlauncher.core.shortcut.isLinkRelated
+import com.coelacanth9.simplecustomlauncher.model.RAKUTEN_LINK_PACKAGE
+import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
+import com.coelacanth9.simplecustomlauncher.model.ShortcutType
+import com.coelacanth9.simplecustomlauncher.model.isLinkRelated
 import com.coelacanth9.simplecustomlauncher.platform.AppInfo
 import com.coelacanth9.simplecustomlauncher.platform.ShortcutData
 import com.coelacanth9.simplecustomlauncher.platform.ShortcutHelper

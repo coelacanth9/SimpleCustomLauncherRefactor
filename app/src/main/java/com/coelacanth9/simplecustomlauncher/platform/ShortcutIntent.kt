@@ -3,8 +3,8 @@ package com.coelacanth9.simplecustomlauncher.platform
 import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
+import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
+import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 
 /**
  * ShortcutItem から起動用 Intent を生成する拡張関数。

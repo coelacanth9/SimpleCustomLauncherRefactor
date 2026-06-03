@@ -7,8 +7,8 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import com.coelacanth9.simplecustomlauncher.R
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
+import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
+import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import java.util.UUID
 

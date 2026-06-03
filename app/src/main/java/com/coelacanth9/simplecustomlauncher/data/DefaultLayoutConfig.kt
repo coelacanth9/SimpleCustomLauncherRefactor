@@ -2,7 +2,7 @@ package com.coelacanth9.simplecustomlauncher.data
 
 import androidx.annotation.StringRes
 import com.coelacanth9.simplecustomlauncher.R
-import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
+import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 
 data class ItemDef(
     val type: ShortcutType,
