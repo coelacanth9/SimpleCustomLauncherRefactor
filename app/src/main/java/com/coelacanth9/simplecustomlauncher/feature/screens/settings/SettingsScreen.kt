@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.browser.customtabs.CustomTabsIntent
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.coelacanth9.simplecustomlauncher.BuildConfig
 import com.coelacanth9.simplecustomlauncher.R
 import com.coelacanth9.simplecustomlauncher.data.RestoreResult
@@ -545,8 +546,7 @@ fun SettingsScreen(
                     title = stringResource(R.string.oss_licenses),
                     description = stringResource(R.string.oss_licenses_desc),
                     onClick = {
-                        CustomTabsIntent.Builder().build()
-                            .launchUrl(context, Uri.parse("https://coelacanth9.github.io/SimpleCustomLauncher/OSS_LICENSES"))
+                        context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
                     }
                 )
             }

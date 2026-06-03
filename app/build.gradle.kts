@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.oss.licenses)
 }
 
 android {
@@ -54,6 +55,7 @@ dependencies {
     implementation(libs.google.billing)
     implementation(libs.google.play.services.ads)
     implementation(libs.androidx.browser)
+    implementation(libs.google.oss.licenses)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
