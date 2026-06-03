@@ -58,6 +58,7 @@ import com.coelacanth9.simplecustomlauncher.platform.RequestPermissions
 import com.coelacanth9.simplecustomlauncher.platform.ShortcutHelper
 import com.coelacanth9.simplecustomlauncher.platform.ads.AdManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.BillingManager
+import com.coelacanth9.simplecustomlauncher.platform.billing.DefaultPremiumManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.PurchaseState
 import com.coelacanth9.simplecustomlauncher.ui.components.LargeConfirmDialog
 import com.coelacanth9.simplecustomlauncher.ui.components.TermsConsentDialog
@@ -276,6 +277,7 @@ fun MainLauncherScreen(
         mutableStateOf(PermissionManager.checkPermissions(context, CALENDAR_PERMISSIONS))
     }
     val settingsRepository = remember { SettingsRepository(context) }
+    val premiumManager = remember { DefaultPremiumManager(context, settingsRepository) }
     var permissionHandled by remember { mutableStateOf(false) }
     var showWelcomeDialog by remember { mutableStateOf(false) }
     var showTermsDialog by remember { mutableStateOf(false) }
@@ -369,6 +371,7 @@ fun MainLauncherScreen(
                 factory = ShortcutSelectViewModelFactory(
                     shortcutRepository = shortcutRepository,
                     shortcutHelper = shortcutHelper,
+                    premiumManager = premiumManager,
                     targetPageIndex = dest.pageIndex,
                     targetRow = dest.row,
                     targetColumn = dest.column

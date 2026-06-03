@@ -4,15 +4,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.coelacanth9.simplecustomlauncher.core.layout.LayoutState
 import com.coelacanth9.simplecustomlauncher.core.shortcut.HomeLayoutConfig
-import com.coelacanth9.simplecustomlauncher.core.shortcut.RowConfig
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutPlacement
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
+import com.coelacanth9.simplecustomlauncher.core.shortcut.isLinkRelated
+import com.coelacanth9.simplecustomlauncher.core.shortcut.shouldDeleteOnRemove
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.platform.AppInfo
 import com.coelacanth9.simplecustomlauncher.platform.ShortcutData
 import com.coelacanth9.simplecustomlauncher.platform.ShortcutHelper
+import com.coelacanth9.simplecustomlauncher.platform.billing.PremiumManager
+import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 
 /**
@@ -23,10 +27,15 @@ import java.util.UUID
 class ShortcutSelectViewModel(
     private val shortcutRepository: ShortcutRepository,
     private val shortcutHelper: ShortcutHelper,
+    private val premiumManager: PremiumManager,
     val targetPageIndex: Int,
     val targetRow: Int,
     val targetColumn: Int
 ) : ViewModel() {
+
+    // ===== リアクティブ状態（画面が collectAsState して使う）=====
+
+    val layoutState: StateFlow<LayoutState> = shortcutRepository.layoutState
 
     // ===== UI 状態 =====
 
@@ -38,6 +47,10 @@ class ShortcutSelectViewModel(
 
     var isLoading by mutableStateOf(false)
         private set
+
+    // ===== プレミアム状態 =====
+
+    val isPremium: Boolean get() = premiumManager.isPremiumActive()
 
     // ===== 初期化 =====
 
@@ -180,7 +193,110 @@ class ShortcutSelectViewModel(
         )
     }
 
+    // ===== スロット・行編集操作 =====
+
+    /**
+     * 現スロットを空にする。shouldDeleteOnRemove に従いショートカット本体も削除。
+     */
+    fun clearSlot() {
+        val shortcut = currentShortcutItem() ?: return
+        shortcutRepository.removePlacement(shortcut.id)
+        if (shouldDeleteOnRemove(shortcut)) shortcutRepository.deleteShortcut(shortcut.id)
+    }
+
+    /**
+     * 行の分割数を変更する。はみ出た列・Link 系ショートカットを削除。
+     */
+    fun changeColumns(columns: Int) {
+        val state = shortcutRepository.layoutState.value
+        // はみ出した列の配置を削除
+        state.placements
+            .filter { it.pageIndex == targetPageIndex && it.row == targetRow && it.column >= columns }
+            .forEach { placement ->
+                shortcutRepository.removePlacement(placement.shortcutId)
+                state.shortcuts[placement.shortcutId]?.let { shortcut ->
+                    if (shouldDeleteOnRemove(shortcut)) shortcutRepository.deleteShortcut(shortcut.id)
+                }
+            }
+        // 3列以上に変更する場合、Link 系を削除（アイコンのみで区別不能）
+        if (columns >= 3) {
+            state.placements
+                .filter { it.pageIndex == targetPageIndex && it.row == targetRow && it.column < columns }
+                .forEach { placement ->
+                    state.shortcuts[placement.shortcutId]?.let { shortcut ->
+                        if (isLinkRelated(shortcut)) {
+                            shortcutRepository.removePlacement(placement.shortcutId)
+                            if (shouldDeleteOnRemove(shortcut)) shortcutRepository.deleteShortcut(shortcut.id)
+                        }
+                    }
+                }
+        }
+        val newRows = state.config.rows.map { row ->
+            if (row.pageIndex == targetPageIndex && row.rowIndex == targetRow) row.copy(columns = columns)
+            else row
+        }
+        shortcutRepository.saveLayoutConfig(HomeLayoutConfig(rows = newRows))
+    }
+
+    /**
+     * 行のテキストのみモードを切替。
+     */
+    fun changeTextOnly(textOnly: Boolean) {
+        val currentConfig = shortcutRepository.layoutState.value.config
+        val newRows = currentConfig.rows.map { row ->
+            if (row.pageIndex == targetPageIndex && row.rowIndex == targetRow) row.copy(textOnly = textOnly)
+            else row
+        }
+        shortcutRepository.saveLayoutConfig(HomeLayoutConfig(rows = newRows))
+    }
+
+    /**
+     * 現スロットの背景色・文字色を変更。
+     */
+    fun changeColors(backgroundColor: String?, textColor: String?) {
+        val targetPlacement = shortcutRepository.layoutState.value.placements.find {
+            it.pageIndex == targetPageIndex && it.row == targetRow && it.column == targetColumn
+        } ?: return
+        shortcutRepository.savePlacement(
+            targetPlacement.copy(backgroundColor = backgroundColor, textColor = textColor)
+        )
+    }
+
+    /**
+     * 行全体を削除（全配置削除 + RowConfig 削除）。
+     */
+    fun deleteRow() {
+        val state = shortcutRepository.layoutState.value
+        state.placements
+            .filter { it.pageIndex == targetPageIndex && it.row == targetRow }
+            .forEach { placement ->
+                shortcutRepository.removePlacement(placement.shortcutId)
+                state.shortcuts[placement.shortcutId]?.let { shortcut ->
+                    if (shouldDeleteOnRemove(shortcut)) shortcutRepository.deleteShortcut(shortcut.id)
+                }
+            }
+        val newRows = state.config.rows.filter {
+            !(it.pageIndex == targetPageIndex && it.rowIndex == targetRow)
+        }
+        shortcutRepository.saveLayoutConfig(HomeLayoutConfig(rows = newRows))
+    }
+
+    /**
+     * 未配置ショートカットを完全削除。
+     */
+    fun deleteUnplacedShortcut(shortcut: ShortcutItem) {
+        shortcutRepository.deleteShortcut(shortcut.id)
+    }
+
     // ===== 内部ヘルパー =====
+
+    private fun currentShortcutItem(): ShortcutItem? {
+        val state = shortcutRepository.layoutState.value
+        val shortcutId = state.placements.find {
+            it.pageIndex == targetPageIndex && it.row == targetRow && it.column == targetColumn
+        }?.shortcutId
+        return shortcutId?.let { state.shortcuts[it] }
+    }
 
     private fun placeItem(item: ShortcutItem) {
         updateRowFixedHeight(targetPageIndex, targetRow, item.type)
