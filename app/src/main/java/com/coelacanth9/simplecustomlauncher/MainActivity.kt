@@ -49,7 +49,7 @@ import com.coelacanth9.simplecustomlauncher.feature.launcher.home.PremiumViewMod
 import com.coelacanth9.simplecustomlauncher.feature.launcher.shortcutselect.ShortcutSelectScreen
 import com.coelacanth9.simplecustomlauncher.feature.launcher.shortcutselect.ShortcutSelectViewModel
 import com.coelacanth9.simplecustomlauncher.feature.screens.allapps.AllAppsScreen
-import com.coelacanth9.simplecustomlauncher.feature.screens.calendar.CalendarFullScreen
+import com.coelacanth9.simplecustomlauncher.feature.screens.calendar.CalendarScreen
 import com.coelacanth9.simplecustomlauncher.feature.screens.memo.MemoScreen
 import com.coelacanth9.simplecustomlauncher.feature.screens.settings.SettingsScreen
 import com.coelacanth9.simplecustomlauncher.feature.screens.settings.SettingsViewModel
@@ -426,7 +426,7 @@ fun MainLauncherScreen(
         }
         is NavDestination.Calendar -> {
             val now = LocalDate.now()
-            CalendarFullScreen(
+            CalendarScreen(
                 hasPermission = hasPermission,
                 holidayMap = remember(hasPermission) {
                     homeViewModel.getHolidaysForMonth(now.year, now.monthValue, hasPermission)

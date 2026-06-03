@@ -1,24 +1,418 @@
 package com.coelacanth9.simplecustomlauncher.feature.screens.memo
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.coelacanth9.simplecustomlauncher.R
+import com.coelacanth9.simplecustomlauncher.data.MemoItem
+import com.coelacanth9.simplecustomlauncher.data.MemoRepository
+import com.coelacanth9.simplecustomlauncher.ui.components.DangerConfirmDialog
 
 /**
- * メモ帳画面。
- * TODO: Phase6 で実装予定
+ * メモ帳画面
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MemoScreen(
     onBack: () -> Unit
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("MemoScreen - TODO")
+    val context = LocalContext.current
+    val repository = remember { MemoRepository(context) }
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
     }
+    var memos by remember { mutableStateOf(repository.getMemos()) }
+    var newMemoText by remember { mutableStateOf("") }
+    var fontSize by remember { mutableIntStateOf(repository.getFontSize()) }
+    var showSettings by remember { mutableStateOf(false) }
+    var editingMemo by remember { mutableStateOf<MemoItem?>(null) }
+    var pendingDeleteAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.memo),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            if (memos.all { it.isChecked }) {
+                                repository.uncheckAll()
+                            } else {
+                                repository.checkAll()
+                            }
+                            memos = repository.getMemos()
+                        },
+                        enabled = memos.isNotEmpty()
+                    ) {
+                        Icon(
+                            if (memos.all { it.isChecked }) Icons.Default.Deselect else Icons.Default.SelectAll,
+                            contentDescription = stringResource(R.string.check_all)
+                        )
+                    }
+                    IconButton(
+                        onClick = { pendingDeleteAction = { repository.deleteCheckedMemos() } },
+                        enabled = memos.any { it.isChecked }
+                    ) {
+                        Icon(
+                            Icons.Default.DeleteSweep,
+                            contentDescription = stringResource(R.string.delete_checked),
+                            tint = if (memos.any { it.isChecked }) MaterialTheme.colorScheme.error
+                                   else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                        )
+                    }
+                    IconButton(onClick = { showSettings = true }) {
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            // 新規メモ入力
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                OutlinedTextField(
+                    value = newMemoText,
+                    onValueChange = { newMemoText = it.take(MemoRepository.MAX_MEMO_LENGTH) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusRequester(focusRequester),
+                    placeholder = { Text(stringResource(R.string.new_memo_hint), fontSize = fontSize.sp) },
+                    textStyle = LocalTextStyle.current.copy(fontSize = fontSize.sp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            if (newMemoText.isNotBlank() && memos.size < MemoRepository.MAX_MEMO_COUNT) {
+                                repository.addMemo(newMemoText.trim())
+                                memos = repository.getMemos()
+                                newMemoText = ""
+                                focusManager.clearFocus()
+                            }
+                        }
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
+                    supportingText = { Text("${newMemoText.length} / ${MemoRepository.MAX_MEMO_LENGTH}") }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = {
+                        if (newMemoText.isNotBlank() && memos.size < MemoRepository.MAX_MEMO_COUNT) {
+                            repository.addMemo(newMemoText.trim())
+                            memos = repository.getMemos()
+                            newMemoText = ""
+                            focusManager.clearFocus()
+                        }
+                    },
+                    enabled = memos.size < MemoRepository.MAX_MEMO_COUNT,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.height(56.dp)
+                ) {
+                    Text(stringResource(R.string.register), fontSize = 16.sp)
+                }
+            }
+
+            // メモ一覧
+            if (memos.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_memo),
+                        fontSize = fontSize.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = (fontSize * 1.5).sp
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(memos, key = { it.id }) { memo ->
+                        MemoItemCard(
+                            memo = memo,
+                            fontSize = fontSize,
+                            onToggleCheck = {
+                                repository.toggleCheck(memo.id)
+                                memos = repository.getMemos()
+                            },
+                            onEdit = { editingMemo = memo },
+                            onDelete = {
+                                repository.deleteMemo(memo.id)
+                                memos = repository.getMemos()
+                            }
+                        )
+                    }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                }
+            }
+        }
+    }
+
+    // 削除確認ダイアログ（個別・一括共通）
+    if (pendingDeleteAction != null) {
+        DangerConfirmDialog(
+            title = stringResource(R.string.delete),
+            message = stringResource(R.string.delete_checked_confirm),
+            confirmText = stringResource(R.string.delete_action),
+            onConfirm = {
+                pendingDeleteAction?.invoke()
+                memos = repository.getMemos()
+                pendingDeleteAction = null
+            },
+            onDismiss = { pendingDeleteAction = null }
+        )
+    }
+
+    // 設定ダイアログ
+    if (showSettings) {
+        FontSizeSettingsDialog(
+            currentSize = fontSize,
+            onSizeChange = { newSize ->
+                fontSize = newSize
+                repository.setFontSize(newSize)
+            },
+            onDismiss = { showSettings = false }
+        )
+    }
+
+    // 編集ダイアログ
+    editingMemo?.let { memo ->
+        EditMemoDialog(
+            memo = memo,
+            fontSize = fontSize,
+            onSave = { updatedMemo ->
+                repository.updateMemo(updatedMemo)
+                memos = repository.getMemos()
+                editingMemo = null
+            },
+            onDismiss = { editingMemo = null }
+        )
+    }
+}
+
+@Composable
+private fun MemoItemCard(
+    memo: MemoItem,
+    fontSize: Int,
+    onToggleCheck: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onToggleCheck() },
+        colors = CardDefaults.cardColors(
+            containerColor = if (memo.isChecked) MaterialTheme.colorScheme.tertiaryContainer
+                             else MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = memo.isChecked,
+                onCheckedChange = { onToggleCheck() },
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = memo.text,
+                fontSize = fontSize.sp,
+                modifier = Modifier.weight(1f),
+                textDecoration = if (memo.isChecked) TextDecoration.LineThrough else null,
+                color = if (memo.isChecked) MaterialTheme.colorScheme.onSurfaceVariant
+                        else MaterialTheme.colorScheme.onSurface
+            )
+            Box {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.app_menu),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.edit), fontSize = 16.sp) },
+                        onClick = {
+                            showMenu = false
+                            onEdit()
+                        },
+                        leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                stringResource(R.string.delete),
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            onDelete()
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FontSizeSettingsDialog(
+    currentSize: Int,
+    onSizeChange: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sizeOptions = listOf(16, 20, 24, 28, 32)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.font_size_settings), fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                sizeOptions.forEach { size ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSizeChange(size) }
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = currentSize == size,
+                            onClick = { onSizeChange(size) }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = when (size) {
+                                16 -> stringResource(R.string.font_size_small)
+                                20 -> stringResource(R.string.font_size_standard)
+                                24 -> stringResource(R.string.font_size_large)
+                                28 -> stringResource(R.string.font_size_xlarge)
+                                32 -> stringResource(R.string.font_size_max)
+                                else -> "$size"
+                            },
+                            fontSize = size.sp
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close))
+            }
+        }
+    )
+}
+
+@Composable
+private fun EditMemoDialog(
+    memo: MemoItem,
+    fontSize: Int,
+    onSave: (MemoItem) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var text by remember { mutableStateOf(memo.text) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.edit_memo), fontWeight = FontWeight.Bold) },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it.take(MemoRepository.MAX_MEMO_LENGTH) },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = LocalTextStyle.current.copy(fontSize = fontSize.sp),
+                shape = RoundedCornerShape(8.dp),
+                supportingText = { Text("${text.length} / ${MemoRepository.MAX_MEMO_LENGTH}") }
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (text.isNotBlank()) {
+                        onSave(memo.copy(text = text.trim()))
+                    }
+                }
+            ) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }
