@@ -53,7 +53,7 @@ class ShortcutReceiverActivity : Activity() {
                     intentUri = null,
                     iconUri = null
                 )
-                saveShortcutInfo(item.id, shortcutInfo.id, shortcutInfo.`package`)
+                repository.savePinShortcutInfo(item.id, shortcutInfo.id, shortcutInfo.`package`)
                 if (repository.addShortcutToFirstEmpty(item)) {
                     request.accept()
                     Toast.makeText(this, getString(R.string.item_added, item.label), Toast.LENGTH_SHORT).show()
@@ -84,13 +84,6 @@ class ShortcutReceiverActivity : Activity() {
             }
         }
         finish()
-    }
-
-    private fun saveShortcutInfo(itemId: String, shortcutId: String, packageName: String) {
-        getSharedPreferences("pin_shortcuts", MODE_PRIVATE).edit()
-            .putString("${itemId}_shortcut_id", shortcutId)
-            .putString("${itemId}_package", packageName)
-            .apply()
     }
 
     companion object {

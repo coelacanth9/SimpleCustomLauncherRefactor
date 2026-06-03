@@ -156,5 +156,33 @@ class ShortcutHelper(private val context: Context) {
         } catch (e: Exception) { null }
     }
 
+    /**
+     * 指定パッケージのピンショートカットから、指定IDのものを削除する。
+     * @param packageName 対象パッケージ
+     * @param idsToRemove 削除するショートカットID
+     */
+    fun unpinShortcuts(packageName: String, idsToRemove: Set<String>) {
+        try {
+            val query = LauncherApps.ShortcutQuery()
+                .setPackage(packageName)
+                .setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED)
+            val pinned = launcherApps.getShortcuts(query, android.os.Process.myUserHandle())
+            val remainingIds = pinned?.map { it.id }?.filter { it !in idsToRemove } ?: emptyList()
+            launcherApps.pinShortcuts(packageName, remainingIds, android.os.Process.myUserHandle())
+        } catch (e: Exception) {
+            Log.e("ShortcutHelper", "Failed to unpin shortcuts for $packageName", e)
+        }
+    }
+
+    /**
+     * 指定パッケージ名のうち、アンインストール済みのものを返す。
+     */
+    fun getUninstalledPackages(packageNames: Set<String>): Set<String> {
+        return packageNames.filter { pkg ->
+            try { packageManager.getPackageInfo(pkg, 0); false }
+            catch (e: android.content.pm.PackageManager.NameNotFoundException) { true }
+        }.toSet()
+    }
+
     private fun normalize(name: String): String = name.replace("\\s+".toRegex(), "")
 }

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 
 class ShortcutRepository(private val context: Context) {
 
@@ -26,6 +27,7 @@ class ShortcutRepository(private val context: Context) {
     private val shortcutLock = Any()
     private val placementLock = Any()
     private val layoutLock = Any()
+    private val isUpdating = AtomicBoolean(false)
 
     // ===== リアクティブ状態 =====
 
@@ -45,7 +47,18 @@ class ShortcutRepository(private val context: Context) {
     }
 
     private fun notifyChange() {
+        if (isUpdating.get()) return
         _layoutState.value = loadLayoutState()
+    }
+
+    fun update(block: ShortcutRepository.() -> Unit) {
+        isUpdating.set(true)
+        try {
+            block()
+        } finally {
+            isUpdating.set(false)
+        }
+        notifyChange()
     }
 
     // ===== ショートカット =====
@@ -214,19 +227,6 @@ class ShortcutRepository(private val context: Context) {
             saveShortcut(item)
             false
         }
-    }
-
-    fun getShortcutsByRow(): Map<Int, List<Pair<ShortcutPlacement, ShortcutItem?>>> =
-        getShortcutsByRowForPage(0)
-
-    fun getShortcutsByRowForPage(pageIndex: Int): Map<Int, List<Pair<ShortcutPlacement, ShortcutItem?>>> {
-        val shortcuts = getAllShortcuts()
-        val placements = getPlacementsForPage(pageIndex)
-        return placements
-            .groupBy { it.row }
-            .mapValues { (_, rowPlacements) ->
-                rowPlacements.sortedBy { it.column }.map { it to shortcuts[it.shortcutId] }
-            }
     }
 
     // ===== デフォルトレイアウト =====
