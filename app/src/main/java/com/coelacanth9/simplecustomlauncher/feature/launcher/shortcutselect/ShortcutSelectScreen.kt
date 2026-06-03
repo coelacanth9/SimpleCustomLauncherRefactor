@@ -57,8 +57,6 @@ import com.coelacanth9.simplecustomlauncher.ui.components.InfoDialog
 import com.coelacanth9.simplecustomlauncher.ui.components.LargeDangerConfirmDialog
 import com.coelacanth9.simplecustomlauncher.ui.components.RowDeleteConfirmDialog
 import com.coelacanth9.simplecustomlauncher.ui.theme.AppTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 // ============ 画面状態 ============
 
@@ -215,7 +213,6 @@ fun ShortcutSelectScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val shortcutHelper = remember { ShortcutHelper(context) }
 
     // layoutState を収集して派生ステートを計算
     val layoutState by viewModel.layoutState.collectAsState()
@@ -267,7 +264,6 @@ fun ShortcutSelectScreen(
 
     // 画面遷移ステート
     var screenState by remember { mutableStateOf<SelectScreenState>(SelectScreenState.Main) }
-    var appShortcuts by remember { mutableStateOf<List<ShortcutData>>(emptyList()) }
 
     // ダイアログ表示フラグ
     var showDeviceSettingsDialog by remember { mutableStateOf(false) }
@@ -426,7 +422,7 @@ fun ShortcutSelectScreen(
                 onSelectLinkSms = if (isLinkAvailable) {
                     {
                         try {
-                            val matched = shortcutHelper.findLinkSmsShortcut(contact.phoneNumber, contact.name)
+                            val matched = viewModel.findLinkSmsShortcut(contact.phoneNumber, contact.name)
                             if (matched != null) {
                                 viewModel.placeIntent(
                                     "[SMS]${matched.shortLabel}",
@@ -525,10 +521,11 @@ fun ShortcutSelectScreen(
                 )
             }
             is SelectScreenState.AppList -> {
+                LaunchedEffect(Unit) { viewModel.loadApps() }
                 AppListContent(
-                    shortcutHelper = shortcutHelper,
+                    apps = viewModel.apps,
                     onSelectApp = { app ->
-                        appShortcuts = shortcutHelper.getShortcutsForApp(app.packageName)
+                        viewModel.loadShortcutsForApp(app.packageName)
                         screenState = SelectScreenState.AppShortcuts(app)
                     },
                     modifier = Modifier.padding(paddingValues)
@@ -538,7 +535,7 @@ fun ShortcutSelectScreen(
                 val app = (screenState as SelectScreenState.AppShortcuts).app
                 AppShortcutsContent(
                     app = app,
-                    shortcuts = appShortcuts,
+                    shortcuts = viewModel.shortcuts,
                     onSelectApp = {
                         viewModel.placeApp(app.packageName, app.label)
                         onBack()
@@ -801,16 +798,11 @@ private fun LazyListScope.commonSelectContent(
 
 @Composable
 private fun AppListContent(
-    shortcutHelper: ShortcutHelper,
+    apps: List<AppInfo>?,
     onSelectApp: (AppInfo) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var apps by remember { mutableStateOf<List<AppInfo>?>(null) }
     var searchQuery by remember { mutableStateOf("") }
-
-    LaunchedEffect(Unit) {
-        apps = withContext(Dispatchers.IO) { shortcutHelper.getInstalledApps() }
-    }
 
     val sortedApps = remember(apps) {
         val appList = apps ?: return@remember emptyList()

@@ -1,21 +1,26 @@
 package com.coelacanth9.simplecustomlauncher.feature.screens.settings
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.ViewModel
+import com.coelacanth9.simplecustomlauncher.data.BackupManager
+import com.coelacanth9.simplecustomlauncher.data.RestoreResult
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
+import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.platform.ads.AdManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.BillingManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.PremiumManager
 
 /**
  * 設定画面の ViewModel。
- * プレミアム状態・広告・購入フローを管理する。
- * テーマ変更・壁紙設定・編集モード開始は MainActivity のラムダ経由で行う。
- * TODO: Phase6（SettingsScreen 実装時）に詳細実装予定
+ * プレミアム状態・広告・購入フロー・バックアップ・レイアウト操作を管理する。
  */
 class SettingsViewModel(
     val settingsRepository: SettingsRepository,
     val premiumManager: PremiumManager,
+    val shortcutRepository: ShortcutRepository,
+    val backupManager: BackupManager,
     val billingManager: BillingManager? = null,
     val adManager: AdManager? = null
 ) : ViewModel() {
@@ -37,4 +42,24 @@ class SettingsViewModel(
     fun restorePurchases() {
         billingManager?.restorePurchases()
     }
+
+    // ===== レイアウト操作 =====
+
+    fun resetToDefault() = shortcutRepository.resetToDefault()
+
+    fun clearLayout() = shortcutRepository.clearAllLayout()
+
+    // ===== バックアップ / 復元 =====
+
+    fun createBackupShareIntent(): Intent = backupManager.createShareIntent()
+
+    fun restoreFromUri(uri: Uri): RestoreResult = backupManager.restoreFromUri(uri)
+
+    // ===== デバッグ =====
+
+    fun isDebugPremiumEnabled(): Boolean = premiumManager.isDebugPremiumEnabled()
+
+    fun setDebugPremium(enabled: Boolean) = premiumManager.setDebugPremium(enabled)
+
+    fun clearAllPremiumStatus() = premiumManager.clearAllPremiumStatus()
 }

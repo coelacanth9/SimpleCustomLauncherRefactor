@@ -34,24 +34,26 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.coelacanth9.simplecustomlauncher.core.navigation.NavDestination
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutType
+import com.coelacanth9.simplecustomlauncher.data.BackupManager
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.data.ThemeMode
 import com.coelacanth9.simplecustomlauncher.feature.launcher.home.HomeScreen
 import com.coelacanth9.simplecustomlauncher.feature.launcher.home.HomeViewModel
-import com.coelacanth9.simplecustomlauncher.feature.launcher.home.HomeViewModelFactory
 import com.coelacanth9.simplecustomlauncher.feature.launcher.home.PremiumViewModel
-import com.coelacanth9.simplecustomlauncher.feature.launcher.home.PremiumViewModelFactory
 import com.coelacanth9.simplecustomlauncher.feature.launcher.shortcutselect.ShortcutSelectScreen
 import com.coelacanth9.simplecustomlauncher.feature.launcher.shortcutselect.ShortcutSelectViewModel
-import com.coelacanth9.simplecustomlauncher.feature.launcher.shortcutselect.ShortcutSelectViewModelFactory
 import com.coelacanth9.simplecustomlauncher.feature.screens.allapps.AllAppsScreen
 import com.coelacanth9.simplecustomlauncher.feature.screens.calendar.CalendarFullScreen
 import com.coelacanth9.simplecustomlauncher.feature.screens.memo.MemoScreen
 import com.coelacanth9.simplecustomlauncher.feature.screens.settings.SettingsScreen
+import com.coelacanth9.simplecustomlauncher.feature.screens.settings.SettingsViewModel
+import com.coelacanth9.simplecustomlauncher.platform.CalendarRepository
 import com.coelacanth9.simplecustomlauncher.platform.PermissionManager
 import com.coelacanth9.simplecustomlauncher.platform.PermissionManager.CALENDAR_PERMISSIONS
 import com.coelacanth9.simplecustomlauncher.platform.RequestPermissions
@@ -225,10 +227,39 @@ fun MainLauncherScreen(
 
     // ViewModel
     val homeViewModel: HomeViewModel = viewModel(
-        factory = HomeViewModelFactory(context, shortcutRepository, billingManager, adManager)
+        factory = viewModelFactory {
+            initializer {
+                val settingsRepo = SettingsRepository(context)
+                HomeViewModel(
+                    shortcutRepository = shortcutRepository,
+                    settingsRepository = settingsRepo,
+                    calendarRepository = CalendarRepository(context),
+                    premiumManager = DefaultPremiumManager(context, settingsRepo),
+                    billingManager = billingManager,
+                    adManager = adManager
+                )
+            }
+        }
     )
     val premiumViewModel: PremiumViewModel = viewModel(
-        factory = PremiumViewModelFactory(billingManager, adManager)
+        factory = viewModelFactory {
+            initializer { PremiumViewModel(billingManager, adManager) }
+        }
+    )
+    val settingsViewModel: SettingsViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer {
+                val settingsRepo = SettingsRepository(context)
+                SettingsViewModel(
+                    settingsRepository = settingsRepo,
+                    premiumManager = DefaultPremiumManager(context, settingsRepo),
+                    shortcutRepository = shortcutRepository,
+                    backupManager = BackupManager(context),
+                    billingManager = billingManager,
+                    adManager = adManager
+                )
+            }
+        }
     )
 
     // 起動時に孤立ピンショートカットをクリーンアップ
@@ -277,7 +308,6 @@ fun MainLauncherScreen(
         mutableStateOf(PermissionManager.checkPermissions(context, CALENDAR_PERMISSIONS))
     }
     val settingsRepository = remember { SettingsRepository(context) }
-    val premiumManager = remember { DefaultPremiumManager(context, settingsRepository) }
     var permissionHandled by remember { mutableStateOf(false) }
     var showWelcomeDialog by remember { mutableStateOf(false) }
     var showTermsDialog by remember { mutableStateOf(false) }
@@ -355,8 +385,6 @@ fun MainLauncherScreen(
     }
 
     // NavHost: navDestination に応じて画面を差し替え
-    val shortcutHelper = remember { ShortcutHelper(context) }
-
     when (val dest = homeViewModel.navDestination) {
         is NavDestination.Home -> {
             HomeScreen(
@@ -368,14 +396,19 @@ fun MainLauncherScreen(
         is NavDestination.ShortcutSelect -> {
             val ssViewModel: ShortcutSelectViewModel = viewModel(
                 key = "shortcut_${dest.pageIndex}_${dest.row}_${dest.column}",
-                factory = ShortcutSelectViewModelFactory(
-                    shortcutRepository = shortcutRepository,
-                    shortcutHelper = shortcutHelper,
-                    premiumManager = premiumManager,
-                    targetPageIndex = dest.pageIndex,
-                    targetRow = dest.row,
-                    targetColumn = dest.column
-                )
+                factory = viewModelFactory {
+                    initializer {
+                        val settingsRepo = SettingsRepository(context)
+                        ShortcutSelectViewModel(
+                            shortcutRepository = shortcutRepository,
+                            shortcutHelper = ShortcutHelper(context),
+                            premiumManager = DefaultPremiumManager(context, settingsRepo),
+                            targetPageIndex = dest.pageIndex,
+                            targetRow = dest.row,
+                            targetColumn = dest.column
+                        )
+                    }
+                }
             )
             ShortcutSelectScreen(
                 viewModel = ssViewModel,
@@ -384,12 +417,11 @@ fun MainLauncherScreen(
         }
         is NavDestination.Settings -> {
             SettingsScreen(
+                viewModel = settingsViewModel,
                 onBack = { homeViewModel.navigateToHome() },
                 onEnterEditMode = { homeViewModel.enterEditMode() },
                 onThemeChanged = onThemeChanged,
-                onWallpaperSettingChanged = onWallpaperSettingChanged,
-                billingManager = billingManager,
-                adManager = adManager
+                onWallpaperSettingChanged = onWallpaperSettingChanged
             )
         }
         is NavDestination.Calendar -> {

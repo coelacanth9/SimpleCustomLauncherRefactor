@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.coelacanth9.simplecustomlauncher.core.layout.LayoutState
 import com.coelacanth9.simplecustomlauncher.core.shortcut.HomeLayoutConfig
 import com.coelacanth9.simplecustomlauncher.core.shortcut.ShortcutItem
@@ -16,7 +17,10 @@ import com.coelacanth9.simplecustomlauncher.platform.AppInfo
 import com.coelacanth9.simplecustomlauncher.platform.ShortcutData
 import com.coelacanth9.simplecustomlauncher.platform.ShortcutHelper
 import com.coelacanth9.simplecustomlauncher.platform.billing.PremiumManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 /**
@@ -39,7 +43,7 @@ class ShortcutSelectViewModel(
 
     // ===== UI 状態 =====
 
-    var apps by mutableStateOf<List<AppInfo>>(emptyList())
+    var apps by mutableStateOf<List<AppInfo>?>(null)
         private set
 
     var shortcuts by mutableStateOf<List<ShortcutData>>(emptyList())
@@ -55,14 +59,21 @@ class ShortcutSelectViewModel(
     // ===== 初期化 =====
 
     fun loadApps() {
+        if (isLoading) return
         isLoading = true
-        apps = shortcutHelper.getInstalledApps()
-        isLoading = false
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) { shortcutHelper.getInstalledApps() }
+            apps = result
+            isLoading = false
+        }
     }
 
     fun loadShortcutsForApp(packageName: String) {
         shortcuts = shortcutHelper.getShortcutsForApp(packageName)
     }
+
+    fun findLinkSmsShortcut(phoneNumber: String, contactName: String): ShortcutData? =
+        shortcutHelper.findLinkSmsShortcut(phoneNumber, contactName)
 
     // ===== 配置操作（呼ぶと StateFlow 経由で HomeViewModel に自動反映）=====
 
