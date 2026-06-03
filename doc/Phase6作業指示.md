@@ -127,6 +127,20 @@ billingManager = BillingManager(
 
 ---
 
+## 実装時の設計変更（Phase 6 作業中）
+
+| 項目 | 設計書の記述 | 実際の実装 |
+|---|---|---|
+| `CalendarFullScreen` | ファイル名・関数名 `CalendarFullScreen` | `CalendarScreen` に変更 |
+| ViewModelFactory | `SettingsViewModelFactory.kt` 等を作成 | 全廃止。`viewModelFactory { initializer { ... } }` ラムダに統一 |
+| `SettingsScreen` シグネチャ | `onBack / onEnterEditMode / onThemeChanged / onWallpaperSettingChanged` のみ | `viewModel: SettingsViewModel` を先頭に追加 |
+| `SettingsViewModel` | `settingsRepository / premiumManager / billingManager / adManager` | `shortcutRepository`・`backupManager` を追加（resetToDefault / clearLayout / backup/restore を ViewModel に集約） |
+| OSS ライセンス | 記載なし（URL 代替を想定） | `play-services-oss-licenses 17.1.0` + `oss-licenses-plugin 0.11.0` を追加。`OssLicensesMenuActivity` 使用 |
+| clearLayout 設定項目 | 危険操作セクションに表示 | 旧コードに合わせてコメントアウト（一括削除の必要性に疑問） |
+| `ShortcutSelectScreen` の `ShortcutHelper` | Screen 内で直接生成 | ViewModel 経由に変更。`loadApps()` を `viewModelScope` で非同期化 |
+
+---
+
 ## 参照ファイル（旧プロジェクト）
 
 ```
