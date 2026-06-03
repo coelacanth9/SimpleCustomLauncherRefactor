@@ -2,7 +2,6 @@ package com.coelacanth9.simplecustomlauncher.data
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import com.coelacanth9.simplecustomlauncher.model.HomeLayoutConfig
 import com.coelacanth9.simplecustomlauncher.model.LayoutState
 import com.coelacanth9.simplecustomlauncher.model.RowConfig
@@ -14,7 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ShortcutRepository(private val context: Context) {
@@ -22,8 +20,6 @@ class ShortcutRepository(private val context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences(
         PREFS_NAME, Context.MODE_PRIVATE
     )
-    private val packageManager: PackageManager = context.packageManager
-
     private val shortcutLock = Any()
     private val placementLock = Any()
     private val layoutLock = Any()
@@ -213,22 +209,6 @@ class ShortcutRepository(private val context: Context) {
         } catch (e: Exception) { HomeLayoutConfig() }
     }
 
-    // ===== 便利メソッド =====
-
-    fun addShortcutToFirstEmpty(item: ShortcutItem): Boolean {
-        val layout = getLayoutConfig()
-        val placements = getAllPlacements()
-        val emptySlot = layout.findFirstEmptySlot(placements)
-        return if (emptySlot != null) {
-            saveShortcut(item)
-            savePlacement(ShortcutPlacement(shortcutId = item.id, row = emptySlot.first, column = emptySlot.second))
-            true
-        } else {
-            saveShortcut(item)
-            false
-        }
-    }
-
     // ===== デフォルトレイアウト =====
 
     fun isFirstLaunch(): Boolean = !prefs.getBoolean(KEY_INITIALIZED, false)
@@ -237,83 +217,10 @@ class ShortcutRepository(private val context: Context) {
         prefs.edit().putBoolean(KEY_INITIALIZED, true).apply()
     }
 
-    fun applyDefaultLayout() {
-        prefs.edit().remove(KEY_SHORTCUTS).remove(KEY_PLACEMENTS).remove(KEY_LAYOUT).apply()
-
-        val rows = defaultLayout.mapIndexed { index, row ->
-            RowConfig(rowIndex = index, columns = row.size, fixedHeightDp = getFixedHeightForRow(row))
-        }
-        saveLayoutConfig(HomeLayoutConfig(rows))
-
-        defaultLayout.forEachIndexed { rowIndex, row ->
-            row.forEachIndexed { colIndex, itemName ->
-                val itemDef = itemMapping[itemName]
-                if (itemDef != null) {
-                    val shortcutItem = createShortcutFromDef(itemDef)
-                    if (shortcutItem != null) {
-                        saveShortcut(shortcutItem)
-                        savePlacement(ShortcutPlacement(shortcutId = shortcutItem.id, row = rowIndex, column = colIndex))
-                    }
-                }
-            }
-        }
-        markAsInitialized()
-    }
-
-    private fun getFixedHeightForRow(row: List<String>): Int? {
-        val hasDateDisplay = row.any { itemMapping[it]?.type == ShortcutType.DATE_DISPLAY }
-        val hasTimeDisplay = row.any { itemMapping[it]?.type == ShortcutType.TIME_DISPLAY }
-        return when {
-            hasTimeDisplay -> 80
-            hasDateDisplay -> 56
-            else -> null
-        }
-    }
-
-    fun resetToDefault() = applyDefaultLayout()
-
     fun clearAllLayout() {
         prefs.edit().remove(KEY_SHORTCUTS).remove(KEY_PLACEMENTS).remove(KEY_LAYOUT).apply()
         saveLayoutConfig(HomeLayoutConfig(rows = emptyList()))
     }
-
-    fun clearPageLayout(pageIndex: Int) {
-        synchronized(placementLock) {
-            synchronized(layoutLock) {
-                synchronized(shortcutLock) {
-                    val placements = getAllPlacementsInternal().filter { it.pageIndex != pageIndex }
-                    saveAllPlacements(placements)
-
-                    val layout = getLayoutConfigInternal()
-                    val remainingRows = layout.rows.filter { it.pageIndex != pageIndex }
-                    saveLayoutConfigInternal(HomeLayoutConfig(remainingRows))
-
-                    val usedShortcutIds = placements.map { it.shortcutId }.toSet()
-                    val shortcuts = getAllShortcutsInternal().filter { it.key in usedShortcutIds }
-                    saveAllShortcuts(shortcuts.values.toList())
-                }
-            }
-        }
-        notifyChange()
-    }
-
-    private fun createShortcutFromDef(def: ItemDef): ShortcutItem? {
-        val label = context.getString(def.labelResId)
-        return when (def.type) {
-            ShortcutType.APP -> {
-                val installedPackage = def.packageNames.firstOrNull { isAppInstalled(it) }
-                if (installedPackage != null)
-                    ShortcutItem(id = UUID.randomUUID().toString(), type = ShortcutType.APP, label = label, packageName = installedPackage)
-                else null
-            }
-            else -> ShortcutItem(id = UUID.randomUUID().toString(), type = def.type, label = label)
-        }
-    }
-
-    private fun isAppInstalled(packageName: String): Boolean = try {
-        packageManager.getPackageInfo(packageName, 0)
-        true
-    } catch (e: PackageManager.NameNotFoundException) { false }
 
     // ===== JSON変換 =====
 
