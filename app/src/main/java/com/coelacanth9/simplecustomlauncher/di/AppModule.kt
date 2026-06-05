@@ -1,6 +1,7 @@
 package com.coelacanth9.simplecustomlauncher.di
 
 import android.content.Context
+import com.coelacanth9.simplecustomlauncher.data.CalendarRepository
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.platform.BackupManager
@@ -50,6 +51,11 @@ object AppModule {
     @Singleton
     fun provideAdManager(@ApplicationContext context: Context): AdManager =
         AdManager(context)
+
+    @Provides
+    @Singleton
+    fun provideCalendarRepository(@ApplicationContext context: Context): CalendarRepository =
+        CalendarRepository(context)
 
     @Provides
     @Singleton
