@@ -3,7 +3,6 @@ package com.coelacanth9.simplecustomlauncher.feature.launcher.home
 import android.app.Activity
 import android.content.Context
 import android.content.pm.LauncherApps
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.content.Intent
 import android.os.Process
@@ -21,7 +20,6 @@ import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 import com.coelacanth9.simplecustomlauncher.model.isLinkCallList
 import com.coelacanth9.simplecustomlauncher.model.isLinkDialer
-import com.coelacanth9.simplecustomlauncher.model.isLinkRelated
 import com.coelacanth9.simplecustomlauncher.model.shouldDeleteOnRemove
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
@@ -32,6 +30,12 @@ import com.coelacanth9.simplecustomlauncher.platform.billing.BillingManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.PremiumManager
 import com.coelacanth9.simplecustomlauncher.platform.toIntent
 import com.coelacanth9.simplecustomlauncher.model.RAKUTEN_LINK_PACKAGE
+import com.coelacanth9.simplecustomlauncher.usecase.ApplyDefaultLayoutUseCase
+import com.coelacanth9.simplecustomlauncher.usecase.CleanupUseCase
+import com.coelacanth9.simplecustomlauncher.usecase.DeletePageUseCase
+import com.coelacanth9.simplecustomlauncher.usecase.DeleteShortcutUseCase
+import com.coelacanth9.simplecustomlauncher.usecase.EditSlotUseCase
+import com.coelacanth9.simplecustomlauncher.usecase.RowUseCase
 import kotlinx.coroutines.flow.StateFlow
 
 // ===== エラー型 =====
@@ -71,6 +75,12 @@ class HomeViewModel(
     private val settingsRepository: SettingsRepository,
     private val calendarRepository: CalendarRepository,
     private val premiumManager: PremiumManager,
+    private val applyDefaultLayoutUseCase: ApplyDefaultLayoutUseCase,
+    private val rowUseCase: RowUseCase,
+    private val deletePageUseCase: DeletePageUseCase,
+    private val cleanupUseCase: CleanupUseCase,
+    private val deleteShortcutUseCase: DeleteShortcutUseCase,
+    private val editSlotUseCase: EditSlotUseCase,
     private val billingManager: BillingManager? = null,
     private val adManager: AdManager? = null
 ) : ViewModel() {
@@ -255,13 +265,7 @@ class HomeViewModel(
             handleRowLimitExceeded(columns)
             return
         }
-        val newRows = currentConfig.rows.map { row ->
-            if (row.pageIndex == pageIndex && row.rowIndex >= beforeRowIndex)
-                row.copy(rowIndex = row.rowIndex + 1)
-            else row
-        } + RowConfig(pageIndex = pageIndex, rowIndex = beforeRowIndex, columns = columns)
-        shortcutRepository.shiftPlacementsRow(pageIndex, beforeRowIndex, 1)
-        shortcutRepository.saveLayoutConfig(HomeLayoutConfig(rows = newRows))
+        rowUseCase.insertRowAt(pageIndex, beforeRowIndex, columns)
         showAddRowDialog = false
     }
 
@@ -331,194 +335,79 @@ class HomeViewModel(
     // ===== レイアウト操作 =====
 
     fun resetToDefault() {
-        shortcutRepository.resetToDefault()
+        applyDefaultLayoutUseCase.resetToDefault()
         settingsRepository.pageCount = 1
         navigateToPageRequest = 0
     }
 
     fun clearLayout() = shortcutRepository.clearAllLayout()
-    fun clearCurrentPageLayout() = shortcutRepository.clearPageLayout(currentPageIndex)
+
+    fun clearCurrentPageLayout() {
+        val state = shortcutRepository.layoutState.value
+        val pageIndex = currentPageIndex
+        val pagePlacements = state.placements.filter { it.pageIndex == pageIndex }
+        val newRows = state.config.rows.filter { it.pageIndex != pageIndex }
+        shortcutRepository.update {
+            pagePlacements.forEach { placement ->
+                removePlacement(placement.shortcutId)
+                state.shortcuts[placement.shortcutId]?.let { shortcut ->
+                    if (shouldDeleteOnRemove(shortcut)) deleteShortcut(shortcut.id)
+                }
+            }
+            saveLayoutConfig(HomeLayoutConfig(rows = newRows))
+        }
+    }
 
     // ===== 行操作 =====
 
     fun deleteRow(pageIndex: Int, rowIndex: Int) {
-        val state = shortcutRepository.layoutState.value
-        state.placements.filter { it.pageIndex == pageIndex && it.row == rowIndex }.forEach { placement ->
-            shortcutRepository.removePlacement(placement.shortcutId)
-            state.shortcuts[placement.shortcutId]?.let { shortcut ->
-                if (shouldDeleteOnRemove(shortcut)) shortcutRepository.deleteShortcut(shortcut.id)
-            }
-        }
-        val newRows = state.config.rows.filter {
-            !(it.pageIndex == pageIndex && it.rowIndex == rowIndex)
-        }
-        shortcutRepository.saveLayoutConfig(HomeLayoutConfig(rows = newRows))
+        rowUseCase.deleteRow(pageIndex, rowIndex)
     }
 
     fun changeRowColumns(pageIndex: Int, rowIndex: Int, newColumns: Int) {
-        val state = shortcutRepository.layoutState.value
-        // はみ出した列の配置を削除
-        state.placements
-            .filter { it.pageIndex == pageIndex && it.row == rowIndex && it.column >= newColumns }
-            .forEach { placement ->
-                shortcutRepository.removePlacement(placement.shortcutId)
-                state.shortcuts[placement.shortcutId]?.let { shortcut ->
-                    if (shouldDeleteOnRemove(shortcut)) shortcutRepository.deleteShortcut(shortcut.id)
-                }
-            }
-        // 3列以上に変更する場合、Link系を削除（アイコンのみで区別不能）
-        if (newColumns >= 3) {
-            state.placements
-                .filter { it.pageIndex == pageIndex && it.row == rowIndex && it.column < newColumns }
-                .forEach { placement ->
-                    state.shortcuts[placement.shortcutId]?.let { shortcut ->
-                        if (isLinkRelated(shortcut)) {
-                            shortcutRepository.removePlacement(placement.shortcutId)
-                            if (shouldDeleteOnRemove(shortcut)) shortcutRepository.deleteShortcut(shortcut.id)
-                        }
-                    }
-                }
-        }
-        val newRows = state.config.rows.map { row ->
-            if (row.pageIndex == pageIndex && row.rowIndex == rowIndex) row.copy(columns = newColumns)
-            else row
-        }
-        shortcutRepository.saveLayoutConfig(HomeLayoutConfig(rows = newRows))
+        rowUseCase.changeRowColumns(pageIndex, rowIndex, newColumns)
     }
 
     fun changeRowTextOnly(pageIndex: Int, rowIndex: Int, textOnly: Boolean) {
-        val currentConfig = shortcutRepository.layoutState.value.config
-        val newRows = currentConfig.rows.map { row ->
-            if (row.pageIndex == pageIndex && row.rowIndex == rowIndex) row.copy(textOnly = textOnly)
-            else row
-        }
-        shortcutRepository.saveLayoutConfig(HomeLayoutConfig(rows = newRows))
+        rowUseCase.changeTextOnly(pageIndex, rowIndex, textOnly)
     }
 
     // ===== スロット操作 =====
 
     fun clearSlot(shortcut: ShortcutItem) {
-        shortcutRepository.removePlacement(shortcut.id)
-        if (shouldDeleteOnRemove(shortcut)) shortcutRepository.deleteShortcut(shortcut.id)
+        editSlotUseCase.clearSlot(shortcut)
     }
 
     fun changeSlotColors(pageIndex: Int, row: Int, column: Int, backgroundColor: String?, textColor: String?) {
-        val placements = shortcutRepository.layoutState.value.placements
-        val targetPlacement = placements.find {
-            it.pageIndex == pageIndex && it.row == row && it.column == column
-        }
-        if (targetPlacement != null) {
-            shortcutRepository.savePlacement(
-                targetPlacement.copy(backgroundColor = backgroundColor, textColor = textColor)
-            )
-        }
+        editSlotUseCase.changeColors(pageIndex, row, column, backgroundColor, textColor)
     }
 
     // ===== ページ削除 =====
 
     fun deletePage(pageIndex: Int) {
-        val state = shortcutRepository.layoutState.value
-        val currentPageCount = settingsRepository.pageCount
-        if (currentPageCount <= 1) return
-
-        state.placements.filter { it.pageIndex == pageIndex }.forEach { placement ->
-            shortcutRepository.removePlacement(placement.shortcutId)
-            state.shortcuts[placement.shortcutId]?.let { shortcut ->
-                if (shouldDeleteOnRemove(shortcut)) shortcutRepository.deleteShortcut(shortcut.id)
-            }
-        }
-
-        val newRows = state.config.rows
-            .filter { it.pageIndex != pageIndex }
-            .map { row ->
-                if (row.pageIndex > pageIndex) row.copy(pageIndex = row.pageIndex - 1) else row
-            }
-        shortcutRepository.saveLayoutConfig(HomeLayoutConfig(rows = newRows))
-
-        val remainingPlacements = shortcutRepository.layoutState.value.placements
-        remainingPlacements.filter { it.pageIndex > pageIndex }.forEach { placement ->
-            shortcutRepository.savePlacement(placement.copy(pageIndex = placement.pageIndex - 1))
-        }
-
-        settingsRepository.pageCount = currentPageCount - 1
-
-        if (currentPageIndex >= currentPageCount - 1) {
+        val deleted = deletePageUseCase.execute(pageIndex)
+        if (deleted && currentPageIndex >= settingsRepository.pageCount) {
             navigateToPageRequest = maxOf(0, currentPageIndex - 1)
         }
     }
 
     // ===== クリーンアップ =====
 
-    fun cleanupOrphanedPinShortcuts(context: Context) {
-        val orphaned = shortcutRepository.findOrphanedPinShortcuts()
-        if (orphaned.isEmpty()) return
-        val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-        val byPackage = orphaned.groupBy { it.third }
-        for ((packageName, entries) in byPackage) {
-            val orphanedPinIds = entries.map { it.second }.toSet()
-            try {
-                val query = LauncherApps.ShortcutQuery()
-                    .setPackage(packageName)
-                    .setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED)
-                val pinned = launcherApps.getShortcuts(query, Process.myUserHandle())
-                val remainingIds = pinned?.map { it.id }?.filter { it !in orphanedPinIds } ?: emptyList()
-                launcherApps.pinShortcuts(packageName, remainingIds, Process.myUserHandle())
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to cleanup pinned shortcuts for $packageName", e)
-            }
-        }
-        for ((itemId, _, _) in orphaned) shortcutRepository.deletePinShortcutInfo(itemId)
+    fun cleanupOrphanedPinShortcuts() {
+        cleanupUseCase.cleanupOrphanedPinShortcuts()
     }
 
     fun onPackageRemoved(packageName: String) {
-        val shortcuts = shortcutRepository.getShortcutsByPackageName(packageName)
-        if (shortcuts.isEmpty()) return
-        for (shortcut in shortcuts) {
-            if (shortcut.type == ShortcutType.INTENT) shortcutRepository.deletePinShortcutInfo(shortcut.id)
-            shortcutRepository.deleteShortcut(shortcut.id)
-        }
+        cleanupUseCase.onPackageRemoved(packageName)
     }
 
-    fun cleanupUninstalledPackages(context: Context) {
-        val allShortcuts = shortcutRepository.layoutState.value.shortcuts.values
-        val pm = context.packageManager
-        val targets = allShortcuts.filter {
-            (it.type == ShortcutType.APP || it.type == ShortcutType.INTENT) && it.packageName != null
-        }
-        for ((pkg, shortcuts) in targets.groupBy { it.packageName!! }) {
-            val isInstalled = try { pm.getPackageInfo(pkg, 0); true }
-            catch (e: PackageManager.NameNotFoundException) { false }
-            if (!isInstalled) {
-                for (shortcut in shortcuts) {
-                    if (shortcut.type == ShortcutType.INTENT) shortcutRepository.deletePinShortcutInfo(shortcut.id)
-                    shortcutRepository.deleteShortcut(shortcut.id)
-                }
-            }
-        }
+    fun cleanupUninstalledPackages() {
+        cleanupUseCase.cleanupUninstalledPackages()
     }
 
-    fun deleteUnplacedShortcut(context: Context, id: String) {
-        val shortcut = shortcutRepository.getShortcut(id)
-        if (shortcut?.type == ShortcutType.INTENT) {
-            val (pinShortcutId, pinPackageName) = shortcutRepository.getPinShortcutInfo(id)
-            if (pinShortcutId != null && pinPackageName != null) {
-                try {
-                    val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-                    val query = LauncherApps.ShortcutQuery()
-                        .setPackage(pinPackageName)
-                        .setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED)
-                    val pinned = launcherApps.getShortcuts(query, Process.myUserHandle())
-                    val remainingIds = pinned?.map { it.id }?.filter { it != pinShortcutId } ?: emptyList()
-                    launcherApps.pinShortcuts(pinPackageName, remainingIds, Process.myUserHandle())
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to unpin shortcut", e)
-                    showError(ErrorMessage.LaunchFailed)
-                    return
-                }
-            }
-            shortcutRepository.deletePinShortcutInfo(id)
-        }
-        shortcutRepository.deleteShortcut(id)
+    fun deleteUnplacedShortcut(id: String) {
+        val success = deleteShortcutUseCase.execute(id)
+        if (!success) showError(ErrorMessage.LaunchFailed)
     }
 
     // ===== ショートカット起動 =====
