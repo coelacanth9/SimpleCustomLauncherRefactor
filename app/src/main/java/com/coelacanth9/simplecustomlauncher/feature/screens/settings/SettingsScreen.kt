@@ -30,6 +30,8 @@ import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.TapMode
 import com.coelacanth9.simplecustomlauncher.data.ThemeMode
 import com.coelacanth9.simplecustomlauncher.data.VibrationStrength
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.coelacanth9.simplecustomlauncher.model.PremiumSource
 import com.coelacanth9.simplecustomlauncher.platform.RestoreResult
 import com.coelacanth9.simplecustomlauncher.ui.components.ConfirmDialog
 import com.coelacanth9.simplecustomlauncher.ui.components.DangerConfirmDialog
@@ -51,8 +53,9 @@ fun SettingsScreen(
     val activity = context as? Activity
     val sr = viewModel.settingsRepository
 
-    // プレミアム状態（リコンポーズ時に再評価）
-    val isPremium = viewModel.isPremiumActive()
+    // プレミアム状態（StateFlow で即時反映）
+    val premiumStatus by viewModel.premiumStatusFlow.collectAsStateWithLifecycle()
+    val isPremium = premiumStatus.isActive
     val formattedPrice = viewModel.getFormattedPrice()
     val isAdReady = viewModel.isAdReady()
 
@@ -319,7 +322,7 @@ fun SettingsScreen(
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
 
-            // 操作設定
+            // 起動操作・振動
             item {
                 val label = when (tapMode) {
                     TapMode.SINGLE_TAP -> stringResource(R.string.tap_mode_single)
@@ -364,7 +367,15 @@ fun SettingsScreen(
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
 
-            // 表示設定
+            // レイアウト・表示設定
+            item {
+                SettingsActionItem(
+                    title = stringResource(R.string.layout_edit),
+                    description = stringResource(R.string.edit_layout_desc),
+                    onClick = { onEnterEditMode(); onBack() }
+                )
+            }
+
             item {
                 val label = when (themeMode) {
                     ThemeMode.LIGHT  -> stringResource(R.string.theme_light)
@@ -394,6 +405,43 @@ fun SettingsScreen(
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
 
+            // プレミアム購入・広告（未購入時）
+            if (!isPremium) {
+                item {
+                    SettingsActionItem(
+                        title = if (formattedPrice != null)
+                            stringResource(R.string.purchase_with_price, formattedPrice)
+                        else
+                            stringResource(R.string.purchase_unlock),
+                        description = stringResource(R.string.premium_unlock_purchase_desc),
+                        onClick = {
+                            if (sr.termsAccepted) {
+                                activity?.let { viewModel.launchPurchase(it) }
+                            } else {
+                                showTermsForPurchase = true
+                            }
+                        }
+                    )
+                }
+
+                if (isAdReady) {
+                    item { Spacer(modifier = Modifier.height(4.dp)) }
+                    item {
+                        SettingsActionItem(
+                            title = stringResource(R.string.watch_ad_unlock),
+                            description = stringResource(R.string.premium_unlock_ad_desc),
+                            onClick = {
+                                activity?.let {
+                                    viewModel.showRewardedAd(it) { viewModel.premiumManager.recordAdWatch() }
+                                }
+                            }
+                        )
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(4.dp)) }
+            }
+
             // ページ設定（Premium）
             item {
                 SettingsPremiumSelectItem(
@@ -419,18 +467,7 @@ fun SettingsScreen(
                 )
             }
 
-            item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
-
-            // レイアウト編集
-            item {
-                SettingsActionItem(
-                    title = stringResource(R.string.layout_edit),
-                    description = stringResource(R.string.edit_layout_desc),
-                    onClick = { onEnterEditMode(); onBack() }
-                )
-            }
-
-            item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
+            item { Spacer(modifier = Modifier.height(4.dp)) }
 
             // バックアップ / 復元（Premium）
             item {
@@ -474,6 +511,30 @@ fun SettingsScreen(
                 )
             }
 
+            item { Spacer(modifier = Modifier.height(4.dp)) }
+
+            // 復元エリア（常に表示）
+            item {
+                when {
+                    PremiumSource.ONE_TIME_PURCHASE in premiumStatus.activeSources ->
+                        SettingsInfoItem(
+                            title = stringResource(R.string.premium_status_permanent),
+                            value = ""
+                        )
+                    PremiumSource.AD_WATCH in premiumStatus.activeSources ->
+                        SettingsInfoItem(
+                            title = stringResource(R.string.premium_status_ad),
+                            value = ""
+                        )
+                    else ->
+                        SettingsLinkItem(
+                            title = stringResource(R.string.purchase_restored),
+                            description = stringResource(R.string.billing_unavailable),
+                            onClick = { viewModel.restorePurchases() }
+                        )
+                }
+            }
+
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
 
             // 危険操作
@@ -484,16 +545,6 @@ fun SettingsScreen(
                     onClick = { showResetDialog = true }
                 )
             }
-
-            // 一旦機能削除のためコメントアウト。各ページでクリアできるため、一括削除が必要か疑問。
-//            item { Spacer(modifier = Modifier.height(4.dp)) }
-//            item {
-//                SettingsDangerItem(
-//                    title = stringResource(R.string.clear_layout),
-//                    description = stringResource(R.string.clear_layout_desc),
-//                    onClick = { showClearDialog = true }
-//                )
-//            }
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
 
@@ -560,53 +611,6 @@ fun SettingsScreen(
                     title = stringResource(R.string.version),
                     value = "${BuildConfig.VERSION_NAME} ($buildType)"
                 )
-            }
-
-            // プレミアム購入・復元（未購入時）
-            if (!isPremium) {
-                item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
-
-                item {
-                    SettingsActionItem(
-                        title = if (formattedPrice != null)
-                            stringResource(R.string.purchase_with_price, formattedPrice)
-                        else
-                            stringResource(R.string.purchase_unlock),
-                        description = stringResource(R.string.premium_unlock_purchase_desc),
-                        onClick = {
-                            if (sr.termsAccepted) {
-                                activity?.let { viewModel.launchPurchase(it) }
-                            } else {
-                                showTermsForPurchase = true
-                            }
-                        }
-                    )
-                }
-
-                if (isAdReady) {
-                    item { Spacer(modifier = Modifier.height(4.dp)) }
-                    item {
-                        SettingsActionItem(
-                            title = stringResource(R.string.watch_ad_unlock),
-                            description = stringResource(R.string.premium_unlock_ad_desc),
-                            onClick = {
-                                activity?.let {
-                                    viewModel.showRewardedAd(it) { viewModel.premiumManager.recordAdWatch() }
-                                }
-                            }
-                        )
-                    }
-                }
-
-                item { Spacer(modifier = Modifier.height(4.dp)) }
-
-                item {
-                    SettingsLinkItem(
-                        title = stringResource(R.string.purchase_restored),
-                        description = stringResource(R.string.billing_unavailable),
-                        onClick = { viewModel.restorePurchases() }
-                    )
-                }
             }
 
             // デバッグセクション（DEBUG ビルドのみ）

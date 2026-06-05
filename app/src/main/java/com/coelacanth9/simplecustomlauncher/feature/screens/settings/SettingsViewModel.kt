@@ -8,10 +8,12 @@ import com.coelacanth9.simplecustomlauncher.platform.BackupManager
 import com.coelacanth9.simplecustomlauncher.platform.RestoreResult
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
+import com.coelacanth9.simplecustomlauncher.model.PremiumStatus
 import com.coelacanth9.simplecustomlauncher.platform.ads.AdManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.BillingManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.PremiumManager
 import com.coelacanth9.simplecustomlauncher.usecase.ApplyDefaultLayoutUseCase
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * 設定画面の ViewModel。
@@ -26,6 +28,8 @@ class SettingsViewModel(
     val billingManager: BillingManager? = null,
     val adManager: AdManager? = null
 ) : ViewModel() {
+
+    val premiumStatusFlow: StateFlow<PremiumStatus> get() = premiumManager.premiumStatusFlow
 
     fun isPremiumActive(): Boolean = premiumManager.isPremiumActive()
 

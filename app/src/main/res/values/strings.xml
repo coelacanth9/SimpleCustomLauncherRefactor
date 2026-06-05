@@ -139,6 +139,8 @@
     <string name="purchase_restored">購入を復元する</string>
     <string name="premium_unlock_purchase_desc">課金で全機能を永久に利用可能になります。</string>
     <string name="premium_unlock_ad_desc">動画を見て24時間限定で全機能を利用可能になります。</string>
+    <string name="premium_status_permanent">プレミアムユーザーです（永久）</string>
+    <string name="premium_status_ad">プレミアムユーザーです（24時間限定）</string>
     <string name="purchase_failed">購入に失敗しました</string>
 
     <!-- Contact -->

@@ -5,8 +5,11 @@ import android.content.SharedPreferences
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.model.PremiumSource
 import com.coelacanth9.simplecustomlauncher.model.PremiumStatus
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 interface PremiumManager {
+    val premiumStatusFlow: StateFlow<PremiumStatus>
     fun isPremiumActive(): Boolean
     fun getPremiumStatus(): PremiumStatus
     fun recordAdWatch()
@@ -27,6 +30,9 @@ class DefaultPremiumManager(
     private val prefs: SharedPreferences = context.getSharedPreferences(
         PREFS_NAME, Context.MODE_PRIVATE
     )
+
+    private val _premiumStatusFlow = MutableStateFlow(getPremiumStatus())
+    override val premiumStatusFlow: StateFlow<PremiumStatus> = _premiumStatusFlow
 
     override fun isPremiumActive(): Boolean = getPremiumStatus().isActive
 
@@ -54,18 +60,22 @@ class DefaultPremiumManager(
 
     override fun recordAdWatch() {
         prefs.edit().putLong(KEY_AD_WATCH_EXPIRY, System.currentTimeMillis() + AD_WATCH_DURATION_MS).apply()
+        _premiumStatusFlow.value = getPremiumStatus()
     }
 
     override fun recordPurchase() {
         prefs.edit().putBoolean(KEY_ONE_TIME_PURCHASE, true).apply()
+        _premiumStatusFlow.value = getPremiumStatus()
     }
 
     override fun clearPurchase() {
         prefs.edit().putBoolean(KEY_ONE_TIME_PURCHASE, false).apply()
+        _premiumStatusFlow.value = getPremiumStatus()
     }
 
     override fun updateSubscriptionStatus(isActive: Boolean) {
         prefs.edit().putBoolean(KEY_SUBSCRIPTION_ACTIVE, isActive).apply()
+        _premiumStatusFlow.value = getPremiumStatus()
     }
 
     override fun getMaxAccessiblePageIndex(): Int =
@@ -73,6 +83,7 @@ class DefaultPremiumManager(
 
     override fun setDebugPremium(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_DEBUG_PREMIUM, enabled).apply()
+        _premiumStatusFlow.value = getPremiumStatus()
     }
 
     override fun isDebugPremiumEnabled(): Boolean = prefs.getBoolean(KEY_DEBUG_PREMIUM, false)
@@ -84,6 +95,7 @@ class DefaultPremiumManager(
             .putLong(KEY_AD_WATCH_EXPIRY, 0)
             .putBoolean(KEY_DEBUG_PREMIUM, false)
             .apply()
+        _premiumStatusFlow.value = getPremiumStatus()
     }
 
     companion object {
