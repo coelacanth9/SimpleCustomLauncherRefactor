@@ -62,6 +62,13 @@ import com.coelacanth9.simplecustomlauncher.platform.ads.AdManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.BillingManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.DefaultPremiumManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.PurchaseState
+import com.coelacanth9.simplecustomlauncher.usecase.ApplyDefaultLayoutUseCase
+import com.coelacanth9.simplecustomlauncher.usecase.CleanupUseCase
+import com.coelacanth9.simplecustomlauncher.usecase.DeletePageUseCase
+import com.coelacanth9.simplecustomlauncher.usecase.DeleteShortcutUseCase
+import com.coelacanth9.simplecustomlauncher.usecase.EditSlotUseCase
+import com.coelacanth9.simplecustomlauncher.usecase.PlaceShortcutUseCase
+import com.coelacanth9.simplecustomlauncher.usecase.RowUseCase
 import com.coelacanth9.simplecustomlauncher.ui.components.LargeConfirmDialog
 import com.coelacanth9.simplecustomlauncher.ui.components.TermsConsentDialog
 import com.coelacanth9.simplecustomlauncher.ui.theme.SimpleCustomLauncherTheme
@@ -125,7 +132,7 @@ class MainActivity : ComponentActivity() {
 
         // 初回起動時にデフォルトレイアウトを適用
         if (shortcutRepository.isFirstLaunch()) {
-            shortcutRepository.applyDefaultLayout()
+            ApplyDefaultLayoutUseCase(shortcutRepository, this).applyDefaultLayout()
         }
 
         handleIntent(intent)
@@ -230,11 +237,18 @@ fun MainLauncherScreen(
         factory = viewModelFactory {
             initializer {
                 val settingsRepo = SettingsRepository(context)
+                val shortcutHelper = ShortcutHelper(context)
                 HomeViewModel(
                     shortcutRepository = shortcutRepository,
                     settingsRepository = settingsRepo,
                     calendarRepository = CalendarRepository(context),
                     premiumManager = DefaultPremiumManager(context, settingsRepo),
+                    applyDefaultLayoutUseCase = ApplyDefaultLayoutUseCase(shortcutRepository, context),
+                    rowUseCase = RowUseCase(shortcutRepository),
+                    deletePageUseCase = DeletePageUseCase(shortcutRepository, settingsRepo),
+                    cleanupUseCase = CleanupUseCase(shortcutRepository, shortcutHelper),
+                    deleteShortcutUseCase = DeleteShortcutUseCase(shortcutRepository, shortcutHelper),
+                    editSlotUseCase = EditSlotUseCase(shortcutRepository),
                     billingManager = billingManager,
                     adManager = adManager
                 )
@@ -254,6 +268,7 @@ fun MainLauncherScreen(
                     settingsRepository = settingsRepo,
                     premiumManager = DefaultPremiumManager(context, settingsRepo),
                     shortcutRepository = shortcutRepository,
+                    applyDefaultLayoutUseCase = ApplyDefaultLayoutUseCase(shortcutRepository, context),
                     backupManager = BackupManager(context, shortcutRepository, settingsRepo),
                     billingManager = billingManager,
                     adManager = adManager
@@ -264,7 +279,7 @@ fun MainLauncherScreen(
 
     // 起動時に孤立ピンショートカットをクリーンアップ
     LaunchedEffect(Unit) {
-        homeViewModel.cleanupOrphanedPinShortcuts(context)
+        homeViewModel.cleanupOrphanedPinShortcuts()
     }
 
     // ホームジェスチャーでホーム画面に戻る
@@ -296,7 +311,7 @@ fun MainLauncherScreen(
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 homeViewModel.refreshPremiumStatus()
-                homeViewModel.cleanupUninstalledPackages(context)
+                homeViewModel.cleanupUninstalledPackages()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -399,10 +414,15 @@ fun MainLauncherScreen(
                 factory = viewModelFactory {
                     initializer {
                         val settingsRepo = SettingsRepository(context)
+                        val shortcutHelper = ShortcutHelper(context)
                         ShortcutSelectViewModel(
                             shortcutRepository = shortcutRepository,
-                            shortcutHelper = ShortcutHelper(context),
+                            shortcutHelper = shortcutHelper,
                             premiumManager = DefaultPremiumManager(context, settingsRepo),
+                            placeShortcutUseCase = PlaceShortcutUseCase(shortcutRepository),
+                            rowUseCase = RowUseCase(shortcutRepository),
+                            editSlotUseCase = EditSlotUseCase(shortcutRepository),
+                            deleteShortcutUseCase = DeleteShortcutUseCase(shortcutRepository, shortcutHelper),
                             targetPageIndex = dest.pageIndex,
                             targetRow = dest.row,
                             targetColumn = dest.column
