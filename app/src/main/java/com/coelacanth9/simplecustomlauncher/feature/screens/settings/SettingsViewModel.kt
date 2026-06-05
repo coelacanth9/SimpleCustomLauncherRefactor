@@ -11,6 +11,7 @@ import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.platform.ads.AdManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.BillingManager
 import com.coelacanth9.simplecustomlauncher.platform.billing.PremiumManager
+import com.coelacanth9.simplecustomlauncher.usecase.ApplyDefaultLayoutUseCase
 
 /**
  * 設定画面の ViewModel。
@@ -20,6 +21,7 @@ class SettingsViewModel(
     val settingsRepository: SettingsRepository,
     val premiumManager: PremiumManager,
     val shortcutRepository: ShortcutRepository,
+    val applyDefaultLayoutUseCase: ApplyDefaultLayoutUseCase,
     val backupManager: BackupManager,
     val billingManager: BillingManager? = null,
     val adManager: AdManager? = null
@@ -45,7 +47,7 @@ class SettingsViewModel(
 
     // ===== レイアウト操作 =====
 
-    fun resetToDefault() = shortcutRepository.resetToDefault()
+    fun resetToDefault() = applyDefaultLayoutUseCase.resetToDefault()
 
     fun clearLayout() = shortcutRepository.clearAllLayout()
 
