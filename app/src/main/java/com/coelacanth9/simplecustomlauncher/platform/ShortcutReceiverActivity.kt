@@ -1,32 +1,33 @@
 package com.coelacanth9.simplecustomlauncher.platform
 
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.LauncherApps
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import com.coelacanth9.simplecustomlauncher.R
 import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.usecase.AddShortcutUseCase
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
+import javax.inject.Inject
 
 /**
  * 外部アプリからの「ホーム画面に追加」リクエストを受け取るActivity
  * ※ minSdk 33 のため INSTALL_SHORTCUT 経由でしか呼ばれず、
  *   現代のアプリはすべて requestPinShortcut → MainActivity 経由のため実質到達しない。
  */
-class ShortcutReceiverActivity : Activity() {
+@AndroidEntryPoint
+class ShortcutReceiverActivity : ComponentActivity() {
 
-    private lateinit var repository: ShortcutRepository
-    private lateinit var addShortcutUseCase: AddShortcutUseCase
+    @Inject lateinit var repository: ShortcutRepository
+    @Inject lateinit var addShortcutUseCase: AddShortcutUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        repository = ShortcutRepository(this)
-        addShortcutUseCase = AddShortcutUseCase(repository)
 
         Log.d(TAG, "Received intent: ${intent.action}")
 

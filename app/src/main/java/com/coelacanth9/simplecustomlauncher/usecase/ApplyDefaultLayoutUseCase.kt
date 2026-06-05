@@ -5,6 +5,8 @@ import android.content.pm.PackageManager
 import androidx.annotation.StringRes
 import com.coelacanth9.simplecustomlauncher.R
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import com.coelacanth9.simplecustomlauncher.model.HomeLayoutConfig
 import com.coelacanth9.simplecustomlauncher.model.RowConfig
 import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
@@ -50,9 +52,9 @@ val defaultLayout = listOf(
 
 // ===== UseCase =====
 
-class ApplyDefaultLayoutUseCase(
+class ApplyDefaultLayoutUseCase @Inject constructor(
     private val repository: ShortcutRepository,
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) {
 
     fun applyDefaultLayout() {

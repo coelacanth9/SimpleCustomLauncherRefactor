@@ -3,8 +3,9 @@ package com.coelacanth9.simplecustomlauncher.usecase
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.model.shouldDeleteOnRemove
+import javax.inject.Inject
 
-class EditSlotUseCase(private val repository: ShortcutRepository) {
+class EditSlotUseCase @Inject constructor(private val repository: ShortcutRepository) {
 
     fun clearSlot(shortcut: ShortcutItem) {
         repository.update {

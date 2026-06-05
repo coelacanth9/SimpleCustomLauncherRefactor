@@ -3,8 +3,9 @@ package com.coelacanth9.simplecustomlauncher.usecase
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.model.ShortcutPlacement
+import javax.inject.Inject
 
-class AddShortcutUseCase(
+class AddShortcutUseCase @Inject constructor(
     private val repository: ShortcutRepository
 ) {
 

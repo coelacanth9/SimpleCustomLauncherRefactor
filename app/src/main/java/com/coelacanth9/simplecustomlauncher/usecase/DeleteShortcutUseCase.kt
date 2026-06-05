@@ -4,8 +4,9 @@ import android.util.Log
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 import com.coelacanth9.simplecustomlauncher.platform.ShortcutHelper
+import javax.inject.Inject
 
-class DeleteShortcutUseCase(
+class DeleteShortcutUseCase @Inject constructor(
     private val repository: ShortcutRepository,
     private val shortcutHelper: ShortcutHelper
 ) {

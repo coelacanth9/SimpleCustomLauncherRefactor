@@ -5,6 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import com.coelacanth9.simplecustomlauncher.model.LayoutState
 import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.model.ShortcutType
@@ -27,7 +31,8 @@ import kotlinx.coroutines.withContext
  * 選択結果は ShortcutRepository に書き込み、StateFlow 経由で HomeViewModel に反映される。
  * （ViewModel 間の直接参照・コールバックは持たない）
  */
-class ShortcutSelectViewModel(
+@HiltViewModel(assistedFactory = ShortcutSelectViewModel.Factory::class)
+class ShortcutSelectViewModel @AssistedInject constructor(
     private val shortcutRepository: ShortcutRepository,
     private val shortcutHelper: ShortcutHelper,
     private val premiumManager: PremiumManager,
@@ -35,10 +40,19 @@ class ShortcutSelectViewModel(
     private val rowUseCase: RowUseCase,
     private val editSlotUseCase: EditSlotUseCase,
     private val deleteShortcutUseCase: DeleteShortcutUseCase,
-    val targetPageIndex: Int,
-    val targetRow: Int,
-    val targetColumn: Int
+    @Assisted("pageIndex") val targetPageIndex: Int,
+    @Assisted("row") val targetRow: Int,
+    @Assisted("column") val targetColumn: Int
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted("pageIndex") targetPageIndex: Int,
+            @Assisted("row") targetRow: Int,
+            @Assisted("column") targetColumn: Int
+        ): ShortcutSelectViewModel
+    }
 
     // ===== リアクティブ状態（画面が collectAsState して使う）=====
 

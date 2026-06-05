@@ -11,6 +11,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import com.coelacanth9.simplecustomlauncher.R
 import com.coelacanth9.simplecustomlauncher.model.HomeLayoutConfig
 import com.coelacanth9.simplecustomlauncher.model.LayoutState
@@ -70,7 +72,8 @@ data class ErrorEvent(
  * - 課金・広告の UI 状態は PremiumViewModel が持つが、
  *   「プレミアム判定」「ページ追加トリガー」はここで管理する
  */
-class HomeViewModel(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     private val shortcutRepository: ShortcutRepository,
     private val settingsRepository: SettingsRepository,
     private val calendarRepository: CalendarRepository,

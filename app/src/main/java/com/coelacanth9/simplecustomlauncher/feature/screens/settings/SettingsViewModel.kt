@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import com.coelacanth9.simplecustomlauncher.platform.BackupManager
 import com.coelacanth9.simplecustomlauncher.platform.RestoreResult
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
@@ -19,34 +21,35 @@ import kotlinx.coroutines.flow.StateFlow
  * 設定画面の ViewModel。
  * プレミアム状態・広告・購入フロー・バックアップ・レイアウト操作を管理する。
  */
-class SettingsViewModel(
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
     val settingsRepository: SettingsRepository,
     val premiumManager: PremiumManager,
     val shortcutRepository: ShortcutRepository,
     val applyDefaultLayoutUseCase: ApplyDefaultLayoutUseCase,
     val backupManager: BackupManager,
-    val billingManager: BillingManager? = null,
-    val adManager: AdManager? = null
+    val billingManager: BillingManager,
+    val adManager: AdManager
 ) : ViewModel() {
 
     val premiumStatusFlow: StateFlow<PremiumStatus> get() = premiumManager.premiumStatusFlow
 
     fun isPremiumActive(): Boolean = premiumManager.isPremiumActive()
 
-    fun getFormattedPrice(): String? = billingManager?.productInfo?.value?.formattedPrice
+    fun getFormattedPrice(): String? = billingManager.productInfo.value?.formattedPrice
 
-    fun isAdReady(): Boolean = adManager?.isAdReady() == true
+    fun isAdReady(): Boolean = adManager.isAdReady()
 
     fun launchPurchase(activity: Activity) {
-        billingManager?.launchPurchaseFlow(activity)
+        billingManager.launchPurchaseFlow(activity)
     }
 
     fun showRewardedAd(activity: Activity, onRewarded: () -> Unit) {
-        adManager?.showRewardedAd(activity, onRewarded)
+        adManager.showRewardedAd(activity, onRewarded)
     }
 
     fun restorePurchases() {
-        billingManager?.restorePurchases()
+        billingManager.restorePurchases()
     }
 
     // ===== レイアウト操作 =====

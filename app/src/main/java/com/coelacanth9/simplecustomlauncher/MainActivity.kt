@@ -11,6 +11,8 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.browser.customtabs.CustomTabsIntent
@@ -33,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -78,11 +81,12 @@ import kotlinx.coroutines.flow.asSharedFlow
 import java.time.LocalDate
 import java.util.UUID
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private lateinit var shortcutRepository: ShortcutRepository
-    private lateinit var billingManager: BillingManager
-    private lateinit var adManager: AdManager
+    @Inject lateinit var shortcutRepository: ShortcutRepository
+    @Inject lateinit var billingManager: BillingManager
+    @Inject lateinit var adManager: AdManager
 
     /** ホームジェスチャーで HOME intent を受けたことを Compose 側に通知 */
     private val _homeIntent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -111,17 +115,8 @@ class MainActivity : ComponentActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-        shortcutRepository = ShortcutRepository(this)
-
-        // BillingManager 初期化（購入完了処理は Compose 側の LaunchedEffect が担う）
-        billingManager = BillingManager(
-            context = this,
-            onPurchaseComplete = {},  // Compose 側が PurchaseState を監視して処理
-            onPurchaseCleared = {}    // onResume の refreshPremiumStatus() でカバー
-        )
+        // BillingManager・AdManager は Hilt でシングルトン生成済み、ここでライフサイクル初期化
         billingManager.initialize()
-
-        adManager = AdManager(this)
         adManager.initialize()
 
         // アプリアンインストール検知
@@ -232,50 +227,10 @@ fun MainLauncherScreen(
     val activity = context as? android.app.Activity
     val mainActivity = activity as? MainActivity
 
-    // ViewModel
-    val homeViewModel: HomeViewModel = viewModel(
-        factory = viewModelFactory {
-            initializer {
-                val settingsRepo = SettingsRepository(context)
-                val shortcutHelper = ShortcutHelper(context)
-                HomeViewModel(
-                    shortcutRepository = shortcutRepository,
-                    settingsRepository = settingsRepo,
-                    calendarRepository = CalendarRepository(context),
-                    premiumManager = DefaultPremiumManager(context, settingsRepo),
-                    applyDefaultLayoutUseCase = ApplyDefaultLayoutUseCase(shortcutRepository, context),
-                    rowUseCase = RowUseCase(shortcutRepository),
-                    deletePageUseCase = DeletePageUseCase(shortcutRepository, settingsRepo),
-                    cleanupUseCase = CleanupUseCase(shortcutRepository, shortcutHelper),
-                    deleteShortcutUseCase = DeleteShortcutUseCase(shortcutRepository, shortcutHelper),
-                    editSlotUseCase = EditSlotUseCase(shortcutRepository),
-                    billingManager = billingManager,
-                    adManager = adManager
-                )
-            }
-        }
-    )
-    val premiumViewModel: PremiumViewModel = viewModel(
-        factory = viewModelFactory {
-            initializer { PremiumViewModel(billingManager, adManager) }
-        }
-    )
-    val settingsViewModel: SettingsViewModel = viewModel(
-        factory = viewModelFactory {
-            initializer {
-                val settingsRepo = SettingsRepository(context)
-                SettingsViewModel(
-                    settingsRepository = settingsRepo,
-                    premiumManager = DefaultPremiumManager(context, settingsRepo),
-                    shortcutRepository = shortcutRepository,
-                    applyDefaultLayoutUseCase = ApplyDefaultLayoutUseCase(shortcutRepository, context),
-                    backupManager = BackupManager(context, shortcutRepository, settingsRepo),
-                    billingManager = billingManager,
-                    adManager = adManager
-                )
-            }
-        }
-    )
+    // ViewModel（Hilt が依存解決）
+    val homeViewModel: HomeViewModel = hiltViewModel()
+    val premiumViewModel: PremiumViewModel = hiltViewModel()
+    val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     // 起動時に孤立ピンショートカットをクリーンアップ
     LaunchedEffect(Unit) {
@@ -409,25 +364,10 @@ fun MainLauncherScreen(
             )
         }
         is NavDestination.ShortcutSelect -> {
-            val ssViewModel: ShortcutSelectViewModel = viewModel(
+            val ssViewModel: ShortcutSelectViewModel = hiltViewModel(
                 key = "shortcut_${dest.pageIndex}_${dest.row}_${dest.column}",
-                factory = viewModelFactory {
-                    initializer {
-                        val settingsRepo = SettingsRepository(context)
-                        val shortcutHelper = ShortcutHelper(context)
-                        ShortcutSelectViewModel(
-                            shortcutRepository = shortcutRepository,
-                            shortcutHelper = shortcutHelper,
-                            premiumManager = DefaultPremiumManager(context, settingsRepo),
-                            placeShortcutUseCase = PlaceShortcutUseCase(shortcutRepository),
-                            rowUseCase = RowUseCase(shortcutRepository),
-                            editSlotUseCase = EditSlotUseCase(shortcutRepository),
-                            deleteShortcutUseCase = DeleteShortcutUseCase(shortcutRepository, shortcutHelper),
-                            targetPageIndex = dest.pageIndex,
-                            targetRow = dest.row,
-                            targetColumn = dest.column
-                        )
-                    }
+                creationCallback = { factory: ShortcutSelectViewModel.Factory ->
+                    factory.create(dest.pageIndex, dest.row, dest.column)
                 }
             )
             ShortcutSelectScreen(

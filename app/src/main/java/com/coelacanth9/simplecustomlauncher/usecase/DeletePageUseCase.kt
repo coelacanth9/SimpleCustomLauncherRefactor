@@ -4,8 +4,9 @@ import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
 import com.coelacanth9.simplecustomlauncher.model.HomeLayoutConfig
 import com.coelacanth9.simplecustomlauncher.model.shouldDeleteOnRemove
+import javax.inject.Inject
 
-class DeletePageUseCase(
+class DeletePageUseCase @Inject constructor(
     private val repository: ShortcutRepository,
     private val settingsRepository: SettingsRepository
 ) {

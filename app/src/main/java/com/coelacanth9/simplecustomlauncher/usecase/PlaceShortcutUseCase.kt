@@ -7,8 +7,9 @@ import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.model.ShortcutPlacement
 import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 import java.util.UUID
+import javax.inject.Inject
 
-class PlaceShortcutUseCase(private val repository: ShortcutRepository) {
+class PlaceShortcutUseCase @Inject constructor(private val repository: ShortcutRepository) {
 
     fun placeApp(pageIndex: Int, rowIndex: Int, column: Int, packageName: String, label: String) {
         val allShortcuts = repository.layoutState.value.shortcuts

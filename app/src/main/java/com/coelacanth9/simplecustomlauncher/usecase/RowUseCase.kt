@@ -5,8 +5,9 @@ import com.coelacanth9.simplecustomlauncher.model.HomeLayoutConfig
 import com.coelacanth9.simplecustomlauncher.model.RowConfig
 import com.coelacanth9.simplecustomlauncher.model.isLinkRelated
 import com.coelacanth9.simplecustomlauncher.model.shouldDeleteOnRemove
+import javax.inject.Inject
 
-class RowUseCase(
+class RowUseCase @Inject constructor(
     private val repository: ShortcutRepository
 ) {
 
