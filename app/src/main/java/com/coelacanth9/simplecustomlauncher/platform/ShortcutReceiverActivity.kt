@@ -80,7 +80,7 @@ class ShortcutReceiverActivity : Activity() {
                 label = name,
                 intentUri = shortcutIntent.toUri(0)
             )
-            if (repository.addShortcutToFirstEmpty(item)) {
+            if (addShortcutUseCase.addToFirstEmpty(item)) {
                 Toast.makeText(this, getString(R.string.name_added, name), Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, getString(R.string.no_empty_slot), Toast.LENGTH_SHORT).show()
