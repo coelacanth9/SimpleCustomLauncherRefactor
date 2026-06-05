@@ -189,10 +189,12 @@ class BackupManager(
                 settingsRepository.pageCount = settingsObj.optInt("pageCount", 1)
             }
 
-            shortcutRepository.clearAllLayout()
-            shortcuts.forEach { shortcutRepository.saveShortcut(it) }
-            placements.forEach { shortcutRepository.savePlacement(it) }
-            shortcutRepository.saveLayoutConfig(HomeLayoutConfig(rows))
+            shortcutRepository.update {
+                clearAllLayout()
+                shortcuts.forEach { saveShortcut(it) }
+                placements.forEach { savePlacement(it) }
+                saveLayoutConfig(HomeLayoutConfig(rows))
+            }
 
             RestoreResult.Success(
                 shortcutCount = shortcuts.size,
