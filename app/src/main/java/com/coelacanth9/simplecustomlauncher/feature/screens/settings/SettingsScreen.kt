@@ -26,11 +26,11 @@ import androidx.browser.customtabs.CustomTabsIntent
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.coelacanth9.simplecustomlauncher.BuildConfig
 import com.coelacanth9.simplecustomlauncher.R
-import com.coelacanth9.simplecustomlauncher.data.RestoreResult
 import com.coelacanth9.simplecustomlauncher.data.SettingsRepository
 import com.coelacanth9.simplecustomlauncher.data.TapMode
 import com.coelacanth9.simplecustomlauncher.data.ThemeMode
 import com.coelacanth9.simplecustomlauncher.data.VibrationStrength
+import com.coelacanth9.simplecustomlauncher.platform.RestoreResult
 import com.coelacanth9.simplecustomlauncher.ui.components.ConfirmDialog
 import com.coelacanth9.simplecustomlauncher.ui.components.DangerConfirmDialog
 import com.coelacanth9.simplecustomlauncher.ui.components.InfoDialog
@@ -572,7 +572,7 @@ fun SettingsScreen(
                             stringResource(R.string.purchase_with_price, formattedPrice)
                         else
                             stringResource(R.string.purchase_unlock),
-                        description = stringResource(R.string.premium_unlock_short),
+                        description = stringResource(R.string.premium_unlock_purchase_desc),
                         onClick = {
                             if (sr.termsAccepted) {
                                 activity?.let { viewModel.launchPurchase(it) }
@@ -588,7 +588,7 @@ fun SettingsScreen(
                     item {
                         SettingsActionItem(
                             title = stringResource(R.string.watch_ad_unlock),
-                            description = stringResource(R.string.premium_unlock_short),
+                            description = stringResource(R.string.premium_unlock_ad_desc),
                             onClick = {
                                 activity?.let {
                                     viewModel.showRewardedAd(it) { viewModel.premiumManager.recordAdWatch() }

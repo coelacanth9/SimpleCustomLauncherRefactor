@@ -122,7 +122,7 @@
 
     <!-- Premium -->
     <string name="premium_feature">プレミアム機能</string>
-    <string name="premium_page_locked">このページはプレミアム機能です</string>
+    <string name="premium_page_locked">複数ページ利用はプレミアム機能です。</string>
     <string name="premium_multi_page">プレミアム機能：複数ページに対応</string>
     <string name="premium_page_only">複数ページ機能はプレミアム限定です。</string>
     <string name="premium_unlock_prompt">動画を見るか課金して\nすべてのページを解除できます</string>
@@ -136,7 +136,9 @@
     <string name="lock">ロック</string>
     <string name="billing_unavailable">課金サービスに接続できません</string>
     <string name="purchase_complete">購入が完了しました</string>
-    <string name="purchase_restored">購入を復元しました</string>
+    <string name="purchase_restored">購入を復元する</string>
+    <string name="premium_unlock_purchase_desc">課金で全機能を永久に利用可能になります。</string>
+    <string name="premium_unlock_ad_desc">動画を見て24時間限定で全機能を利用可能になります。</string>
     <string name="purchase_failed">購入に失敗しました</string>
 
     <!-- Contact -->
