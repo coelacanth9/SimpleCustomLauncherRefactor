@@ -10,6 +10,7 @@ import com.coelacanth9.simplecustomlauncher.R
 import com.coelacanth9.simplecustomlauncher.model.ShortcutItem
 import com.coelacanth9.simplecustomlauncher.model.ShortcutType
 import com.coelacanth9.simplecustomlauncher.data.ShortcutRepository
+import com.coelacanth9.simplecustomlauncher.usecase.AddShortcutUseCase
 import java.util.UUID
 
 /**
@@ -20,10 +21,12 @@ import java.util.UUID
 class ShortcutReceiverActivity : Activity() {
 
     private lateinit var repository: ShortcutRepository
+    private lateinit var addShortcutUseCase: AddShortcutUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         repository = ShortcutRepository(this)
+        addShortcutUseCase = AddShortcutUseCase(repository)
 
         Log.d(TAG, "Received intent: ${intent.action}")
 
@@ -54,7 +57,7 @@ class ShortcutReceiverActivity : Activity() {
                     iconUri = null
                 )
                 repository.savePinShortcutInfo(item.id, shortcutInfo.id, shortcutInfo.`package`)
-                if (repository.addShortcutToFirstEmpty(item)) {
+                if (addShortcutUseCase.addToFirstEmpty(item)) {
                     request.accept()
                     Toast.makeText(this, getString(R.string.item_added, item.label), Toast.LENGTH_SHORT).show()
                 } else {
