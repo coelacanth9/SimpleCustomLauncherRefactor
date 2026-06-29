@@ -5,7 +5,7 @@
 ## 使い方・詳細
 
 詳しい使い方や機能紹介は以下のページをご覧ください。
-https://coelacanth9.github.io/SimpleCustomLauncher/
+[https://coelacanth9.github.io/SimpleCustomLauncher/](https://coelacanth9.github.io/SimpleCustomLauncherRefactor/)
 
 ### ライセンス
 
